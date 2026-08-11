@@ -11,6 +11,7 @@ import { MarketPage } from './pages/MarketPage'
 import { AboutPage } from './pages/AboutPage'
 import { LookbookPage } from './pages/LookbookPage'
 import { CaseStudyPage } from './pages/CaseStudyPage'
+import { StatesPage } from './pages/StatesPage'
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
             <Route path="/blog/:slug" element={<PostPage />} />
             <Route path="/market" element={<MarketPage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/states" element={<StatesPage />} />
             <Route path="/lookbook" element={<LookbookPage />} />
             <Route path="/case-study" element={<CaseStudyPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />

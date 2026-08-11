@@ -105,9 +105,9 @@ export function MarketPage() {
 
       <h2 className="mb-3 mt-12 font-display text-2xl uppercase">BKC whitespace</h2>
       <p className="max-w-3xl text-sm text-ink-70">
-        Loud Hinglish humour without punching down. Occasion calendar including civic turnout. Animals & insects as a
-        real capsule. Pride stocked year-round. Procedural garment previews that recolour live — a demo of how a small
-        label can look like a big catalogue without a photo studio on day one.
+        <b>Shop by where you speak.</b> National D2C owns Hindi/English memes. City slang brands own one tongue.
+        BKC ships a filterable India atlas — state → region → day-to-day language — plus soft-censor brand humour
+        (Ch**tiya / चूtiya) that turns a gaali into affectionate habit.
       </p>
     </div>
   )

@@ -54,7 +54,7 @@ export function LookbookPage() {
       <figure className="mb-8 overflow-hidden border-2 border-ink bg-cream">
         <img
           src={`${import.meta.env.BASE_URL}lookbook/hero-kunal.png`}
-          alt="Model wearing Bharat Ka Chootiya oversized white tee"
+          alt="Model wearing Bharat Ka Ch**tiya oversized white tee"
           width={900}
           height={1200}
           className="mx-auto max-h-[70vh] w-full object-cover object-top"

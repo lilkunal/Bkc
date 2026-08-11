@@ -216,6 +216,79 @@ export const POSTS: BlogPost[] = [
       '<p>Badge: IDIOM. Categories: humour and animals. Fit: oversized, off-white, Rozha One. The product copy is explicit on purpose: an idiom about temperament, not a jab at anyone. If a line needs a paragraph of defence to stay kind, we do not print it. This one did not.</p>' +
       '<blockquote>Wear it if you are the friend who always apologises first. Or if you are buying for that friend, which is most of you.</blockquote>',
   },
+  {
+    slug: 'how-to-choose-your-bkc-tee',
+    title: 'How to choose your BKC tee (4 questions)',
+    dek: 'Fit, tongue, occasion, loudness — a short chooser so you do not scroll 180 designs into analysis paralysis.',
+    glyph: '🧭',
+    bg: '#FFB703',
+    cat: 'Chooser',
+    date: '2026-08-11',
+    read: 5,
+    body:
+      '<p>Too many tees is a good problem until it is not. Use these four questions.</p>' +
+      '<h2>1. What cut do you actually wear?</h2>' +
+      '<p>Oversized 240 GSM if you want silhouette and print area. Regular 180 GSM for Indian summer and daily wash cycles. Crop if the hem is the point. Kids if the neck tape must not itch.</p>' +
+      '<h2>2. Where do you speak?</h2>' +
+      '<p>Open <b>States</b>. If you are from Kumaon, filter Kumaon — not “Hindi humour.” Day-to-day language lands harder than pan-India catchphrases when the auntie at the wedding recognises it.</p>' +
+      '<h2>3. Is this for a date on the calendar?</h2>' +
+      '<p>Festivals, polling day, shaadi season, monsoon — check Occasions. Civic tees stay non-partisan on purpose.</p>' +
+      '<h2>4. How soft should the joke be?</h2>' +
+      '<p>Our brand word is printed as <b>Ch**tiya</b> or the Hinglish lockup <b>चूtiya</b>. If you want zero edge, pick food, animals, or typography. If you want local heat, pick your region.</p>',
+  },
+  {
+    slug: 'soft-censor-chootiya',
+    title: 'Why we write Ch**tiya (and चूtiya)',
+    dek: 'It started as a gaali. India already softened it into “yaar, you idiot.” Our job is to make that habit visible — and cute.',
+    glyph: '✨',
+    bg: '#E01B24',
+    cat: 'Brand',
+    date: '2026-08-11',
+    read: 4,
+    body:
+      '<p>In today’s India, calling someone a chootiya in a group chat is closer to affectionate roasting than to a weapon. Still: on a storefront, on a billboard, on a school WhatsApp forward, the full spelling can make people flinch before they smile.</p>' +
+      '<h2>Soft censor is the bridge</h2>' +
+      '<p>We print <b>Ch**tiya</b> on product titles and most hero surfaces. Same sound. Less shock. The brain fills the gap — which is exactly how language change works.</p>' +
+      '<h2>Hinglish lockup: चू + tiya</h2>' +
+      '<p>Devanagari <b>चू</b> plus Latin <b>tiya</b>. It reads as a designed word, not a shouted gaali. Parents photograph it. Cousins get it. The logo does the rebranding without a lecture.</p>' +
+      '<h2>The motto</h2>' +
+      '<blockquote>From gaali to habit — the affectionate idiot.</blockquote>' +
+      '<p>We are not erasing the word. We are moving it into the register India already uses: idiot energy, not hate.</p>',
+  },
+  {
+    slug: 'india-slang-atlas',
+    title: 'The India slang atlas: state → region → day-to-day',
+    dek: 'Why “Shop by where you speak” is the gap Bewakoof, Beyoung and city-only slang brands leave open.',
+    glyph: '🗺️',
+    bg: '#0FA678',
+    cat: 'Chooser',
+    date: '2026-08-11',
+    read: 6,
+    body:
+      '<p>Puneri Paati owns Pune Marathi. Hyderabadi slang labels own Deccani. Tamil meme shops own Tamil. National D2C owns English + Hindi punchlines. The missing product is a <b>single cart</b> that respects how India actually talks — state by state, region by region.</p>' +
+      '<h2>Uttarakhand is the proof</h2>' +
+      '<p>Kumaon and Garhwal are not the same tongue. <i>चाल जालुं</i> is Kumaoni. <i>सिवासौँळी</i> is Garhwali. A “Pahadi tee” that ignores that is tourist merch. We filter both.</p>' +
+      '<h2>Day-to-day beats festival-only</h2>' +
+      '<p>Festival drops sell. Greeting lines, check-ins, and “let’s go” phrases sell every week — because people say them every week.</p>' +
+      '<h2>How to use the atlas</h2>' +
+      '<ol><li>Open States.</li><li>Pick your state.</li><li>Pick your region / language.</li><li>Add to bag next to a pan-India classic if you want.</li></ol>',
+  },
+  {
+    slug: 'oversized-or-regular-chooser',
+    title: 'Oversized or regular: the 60-second chooser',
+    dek: 'Climate, photo, gift, and wash-cycle — pick a silhouette without a size chart spiral.',
+    glyph: '👕',
+    bg: '#AFCBE3',
+    cat: 'Chooser',
+    date: '2026-08-10',
+    read: 3,
+    body:
+      '<p><b>Pick oversized</b> if you want drop shoulders, bigger print, cooler photos, or gifting across body types.</p>' +
+      '<p><b>Pick regular</b> if you live in a hot city, wash weekly, or want a classic that layers under a shirt.</p>' +
+      '<p><b>Pick crop</b> if the hem is the silhouette.</p>' +
+      '<p><b>Pick kids</b> for soft 160 GSM and no-scratch neck tape.</p>' +
+      '<blockquote>When unsure: oversized in chalk white. It forgives everything except bad jokes — and we already filtered those.</blockquote>',
+  },
 ]
 
 export function getPostBySlug(slug: string): BlogPost | undefined {

@@ -8,6 +8,7 @@ import {
   PRODUCTS,
   filterProducts,
 } from '../data/catalog'
+import { STATES } from '../data/states'
 import { ProductCard, SectionHead } from '../components/ProductCard'
 
 export function ShopPage() {
@@ -20,6 +21,8 @@ export function ShopPage() {
     occ: params.get('occ') || '',
     aud: params.get('aud') || '',
     color: params.get('color') || '',
+    state: params.get('state') || '',
+    region: params.get('region') || '',
     q: params.get('q') || '',
     sort: params.get('sort') || 'featured',
   }
@@ -28,6 +31,7 @@ export function ShopPage() {
     const next = new URLSearchParams(params)
     if (!value) next.delete(key)
     else next.set(key, value)
+    if (key === 'state') next.delete('region')
     setParams(next, { replace: true })
   }
 
@@ -38,6 +42,8 @@ export function ShopPage() {
       occ: filters.occ || undefined,
       aud: filters.aud || undefined,
       color: filters.color || undefined,
+      state: filters.state || undefined,
+      region: filters.region || undefined,
       q: filters.q || undefined,
     })
     if (filters.sort === 'price-asc') list = [...list].sort((a, b) => a.price - b.price)
@@ -45,7 +51,12 @@ export function ShopPage() {
     if (filters.sort === 'rating') list = [...list].sort((a, b) => b.rating - a.rating)
     if (filters.sort === 'reviews') list = [...list].sort((a, b) => b.reviews - a.reviews)
     return list
-  }, [filters.fit, filters.cat, filters.occ, filters.aud, filters.color, filters.q, filters.sort])
+  }, [filters.fit, filters.cat, filters.occ, filters.aud, filters.color, filters.state, filters.region, filters.q, filters.sort])
+
+  const regionOpts =
+    filters.state && STATES.find((s) => s.key === filters.state)
+      ? STATES.find((s) => s.key === filters.state)!.regions.map((r) => [r.key, `${r.label} (${r.lang})`] as [string, string])
+      : STATES.flatMap((s) => s.regions.map((r) => [r.key, `${s.label} · ${r.label}`] as [string, string]))
 
   const FilterFields = (
     <div className="flex flex-col gap-4">
@@ -74,6 +85,8 @@ export function ShopPage() {
               ['kids', 'Kids'],
             ] as [string, string][],
           ],
+          ['state', 'State', STATES.map((s) => [s.key, s.label] as [string, string])],
+          ['region', 'Region / tongue', regionOpts],
           ['color', 'Colour', Object.entries(COLORS).map(([k, v]) => [k, v.name] as [string, string])],
         ] as const
       ).map(([key, label, opts]) => (

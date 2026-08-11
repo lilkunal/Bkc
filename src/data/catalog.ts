@@ -1,5 +1,7 @@
 /** BKC catalogue — colours, fits, taxonomy, products, helpers. */
 
+import { REGIONAL_PRODUCTS } from './regionalProducts'
+
 export type ColorKey =
   | 'white'
   | 'black'
@@ -45,6 +47,7 @@ export type CategoryKey =
   | 'travel'
   | 'music'
   | 'typography'
+  | 'slang'
 
 export type OccasionKey =
   | 'republic'
@@ -138,6 +141,9 @@ export interface Product {
   reviews: number
   badge: string
   desc: string
+  state?: string
+  region?: string
+  lang?: string
 }
 
 export interface ProductInput {
@@ -160,6 +166,9 @@ export interface ProductInput {
   r?: number
   rev?: number
   d?: string
+  state?: string
+  region?: string
+  lang?: string
 }
 
 export interface ProductFilter {
@@ -168,6 +177,8 @@ export interface ProductFilter {
   occ?: OccasionKey | string
   aud?: AudienceKey | string
   color?: ColorKey | string
+  state?: string
+  region?: string
   q?: string
 }
 
@@ -252,6 +263,7 @@ export const CATEGORIES: Category[] = [
   { key: 'travel', label: 'Travel', glyph: '🚂', note: 'Sleeper class romantics.' },
   { key: 'music', label: 'Music', glyph: '🎧', note: 'Bass bhai bass.' },
   { key: 'typography', label: 'Pure Typography', glyph: 'Aa', note: 'No art. Just letterforms.' },
+  { key: 'slang', label: 'State Slang Atlas', glyph: '🗣️', note: 'Day-to-day talk by state and region.' },
 ]
 
 export const OCCASIONS: Occasion[] = [
@@ -362,6 +374,14 @@ export const COLLECTIONS: Collection[] = [
     note: 'Typography-only. No illustration, no emoji, all letterform.',
     filter: { cat: 'typography' },
   },
+  {
+    key: 'slang-atlas',
+    label: 'Slang Atlas',
+    glyph: '🗣️',
+    hero: '#A6E2C6',
+    note: 'Shop by where you speak — Kumaoni to Malayalam, same cart.',
+    filter: { cat: 'slang' },
+  },
 ]
 
 let idn = 0
@@ -402,13 +422,17 @@ function mk(a: ProductInput): Product {
     reviews: a.rev || 40 + (idn * 37) % 900,
     badge: a.b || '',
     desc: a.d || '',
+    state: a.state,
+    region: a.region,
+    lang: a.lang,
   }
 }
 
 export const PRODUCTS: Product[] = [
-  mk({ name: "Bharat Ka Chootiya — The Original", p: ["BHARAT KA","CHOOTIYA"], f: "anton", fit: "oversized", c: "white", pr: 999, mrp: 1999, aud: ["men","women","unisex"], cat: ["humour","typography","statement"], b: "HERO DROP", r: 4.9, rev: 3128, d: "The tee the whole brand is named after. Eight typefaces, one white 240 GSM canvas — pick the letterform that matches your particular brand of nonsense." }),
+  mk({ name: "Bharat Ka Ch**tiya — The Original", p: ["BHARAT KA","Ch**tiya"], f: "anton", fit: "oversized", c: "white", pr: 999, mrp: 1999, aud: ["men","women","unisex"], cat: ["humour","typography","statement"], b: "HERO DROP", r: 4.9, rev: 3128, d: "The soft-censor brand tee. Gaali softened to habit — affectionate idiot energy on 240 GSM." }),
   mk({ name: "BKC Monogram", p: ["BKC"], f: "anton", fit: "oversized", c: "black", pr: 899, aud: ["unisex"], cat: ["typography"], bd: "ring", bdc: "#E7B325", b: "NEW", r: 4.7, rev: 612, d: "Three letters, one ring, zero explanation needed." }),
-  mk({ name: "Certified Chootiya", p: ["CERTIFIED"], g: "🏅", f: "bebas", fit: "regular", c: "mustard", pr: 699, aud: ["unisex"], cat: ["humour"], r: 4.6, rev: 890 }),
+  mk({ name: "Certified Ch**tiya", p: ["CERTIFIED","Ch**tiya"], g: "🏅", f: "bebas", fit: "regular", c: "mustard", pr: 699, aud: ["unisex"], cat: ["humour"], r: 4.6, rev: 890 }),
+  mk({ name: "चूtiya Lockup", p: ["चूtiya"], f: "rozha", fit: "oversized", c: "white", pr: 949, aud: ["unisex"], cat: ["typography","humour"], b: "HINGLISH", r: 4.8, rev: 1200, d: "Chu in Devanagari, tiya in Latin — cute enough that nobody flinches, clear enough that everyone gets it." }),
   mk({ name: "Chai Pe Charcha", p: ["CHAI PE","CHARCHA"], g: "☕", f: "rozha", fit: "oversized", c: "sand", cat: ["humour","foodie"], b: "BESTSELLER", r: 4.8, rev: 2140 }),
   mk({ name: "Sab Moh Maya Hai", p: ["SAB MOH","MAYA HAI"], g: "🌀", f: "rozha", fit: "oversized", c: "black", cat: ["humour","statement"], r: 4.7, rev: 1560 }),
   mk({ name: "Log Kya Kahenge", p: ["LOG KYA","KAHENGE"], g: "👀", f: "anton", fit: "oversized", c: "chilli", cat: ["humour"], b: "TRENDING", r: 4.6, rev: 1802 }),
@@ -544,6 +568,12 @@ export const PRODUCTS: Product[] = [
   mk({ name: "Chal Bhai", p: ["CHAL","BHAI"], f: "marker", fit: "regular", c: "coral", cat: ["typography","humour"], r: 4.5, rev: 350 }),
   mk({ name: "Hai Na?", p: ["HAI","NA?"], f: "playfair", fit: "crop", c: "lavender", aud: ["women"], cat: ["typography","women"], r: 4.5, rev: 275 }),
   mk({ name: "Scene On Hai", p: ["SCENE ON","HAI"], f: "mono", fit: "oversized", c: "teal", cat: ["typography"], r: 4.6, rev: 505 }),
+  ...REGIONAL_PRODUCTS.map((p) =>
+    mk({
+      ...p,
+      cat: Array.from(new Set([...(p.cat || ['regional']), 'slang', 'regional'])) as CategoryKey[],
+    }),
+  ),
 ]
 
 export function getProductById(id: string): Product | undefined {
@@ -571,9 +601,14 @@ export function filterProducts(filter: ProductFilter = {}): Product[] {
         p.audience.includes(aud) || (aud !== 'kids' && p.audience.includes('unisex'))
       if (!match) return false
     }
+    if (filter.state && p.state !== filter.state) return false
+    if (filter.region && p.region !== filter.region) return false
     if (filter.q) {
       const q = filter.q.toLowerCase()
-      const hay = [p.name, p.desc, ...p.printLines, ...p.cats].join(' ').toLowerCase()
+      const hay = [p.name, p.desc, p.lang, p.state, p.region, ...p.printLines, ...p.cats]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
       if (!hay.includes(q)) return false
     }
     return true

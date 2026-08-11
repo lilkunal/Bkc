@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react'
 import { useCart } from '../context/CartContext'
 import { money } from '../lib/format'
 import { Tee } from './Tee'
+import { BRAND } from '../data/states'
 
 const NAV = [
   { to: '/shop', label: 'Shop' },
+  { to: '/states', label: 'States' },
   { to: '/collections', label: 'Collections' },
   { to: '/occasions', label: 'Occasions' },
   { to: '/lookbook', label: 'Lookbook' },
@@ -55,7 +57,7 @@ export function Header() {
         <div className="mx-auto flex h-[62px] max-w-[1440px] items-center justify-between gap-3 px-[clamp(1rem,0.5rem+2vw,3rem)]">
           <Link to="/" className="flex items-center gap-2" aria-label="BKC home">
             <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="" className="h-9 w-auto sm:h-10" width={120} height={40} />
-            <span className="sr-only">Bharat Ka Chootiya</span>
+            <span className="sr-only">{BRAND.full}</span>
           </Link>
 
           <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
@@ -143,11 +145,17 @@ export function Footer() {
       <div className="mx-auto grid max-w-[1440px] gap-8 px-[clamp(1rem,0.5rem+2vw,3rem)] py-10 md:grid-cols-3">
         <div>
           <p className="font-display text-3xl uppercase">BKC</p>
+          <p className="mt-1 font-deva text-2xl text-marigold">
+            चू<span className="font-display text-cream">tiya</span>
+          </p>
           <p className="mt-2 max-w-xs text-sm text-cream/80">
-            Bharat Ka Chootiya — printed tees for everyone in India. Humour without the fuse.
+            {BRAND.full} — {BRAND.motto} Printed tees for every Indian tongue.
           </p>
         </div>
         <div className="grid grid-cols-2 gap-3 text-sm">
+          <Link to="/states" className="min-h-11 py-2 hover:text-marigold">
+            States & slang
+          </Link>
           <Link to="/shop" className="min-h-11 py-2 hover:text-marigold">
             Shop all
           </Link>
@@ -235,7 +243,7 @@ export function CartDrawer() {
         </div>
         <div className="flex-1 overflow-y-auto p-4">
           {items.length === 0 ? (
-            <p className="text-ink-70">Bag is empty. Go be a productive chootiya.</p>
+            <p className="text-ink-70">Bag is empty. Go be a productive {BRAND.softWord}.</p>
           ) : (
             <ul className="flex flex-col gap-4">
               {items.map((item) => (

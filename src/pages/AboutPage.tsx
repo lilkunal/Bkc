@@ -1,4 +1,5 @@
 import { FITS } from '../data/catalog'
+import { BRAND } from '../data/states'
 import { SectionHead } from '../components/ProductCard'
 
 export function AboutPage() {
@@ -6,34 +7,47 @@ export function AboutPage() {
     <div className="mx-auto max-w-[1440px] px-[clamp(1rem,0.5rem+2vw,3rem)] py-8 md:py-12">
       <SectionHead
         eyebrow="The label"
-        title={<>Bharat Ka<br />Chootiya</>}
-        note="Chootiya is the word every Indian group chat already uses. We just put it on 240 GSM cotton."
+        title={
+          <>
+            Bharat Ka
+            <br />
+            <span className="font-deva text-chilli">चू</span>
+            <span className="text-chilli">tiya</span>
+          </>
+        }
+        note={`${BRAND.motto} Soft-censor spelling: ${BRAND.softWord}.`}
       />
 
       <div className="grid gap-8 lg:grid-cols-2">
         <div className="space-y-4 text-sm text-ink-70">
           <p>
-            BKC is a fictional Indian printed-tee label built as a real storefront demo: catalogue, filters, PDP,
-            cart, journal, market file, and a procedural garment renderer so every colourway can be previewed without
-            a photo shoot.
+            BKC is an Indian printed-tee label that treats day-to-day language as the product. Not just Hindi memes —
+            Kumaoni, Garhwali, Punjabi, Deccani, Tamil, Malayalam, Bangla, and the rest, filterable by state and region.
           </p>
           <p>
-            The joke is affectionate. Across India, calling someone a chootiya is often closer to “yaar, you idiot”
-            than to a weapon. We keep a hard content line: nothing targeting a caste, religion, region or individual.
-            Civic tees stay non-partisan.
+            The word started as a gaali. India already uses it as affectionate “idiot.” We print it as{' '}
+            <b>{BRAND.softWord}</b> and as the Hinglish lockup <b className="font-deva">{BRAND.hinglishLockup}</b> so
+            people smile before they flinch — until flinching stops being the default.
           </p>
           <p>
-            <b>अल्लाह की गाय</b> sits in the humour/animals capsule as an idiom for a bhola-bhala, harmless person —
-            with glossary copy on the product page so the meaning is unmistakable.
+            <b>Our one gap vs ecommerce:</b> {BRAND.differentiator}
           </p>
         </div>
         <div className="border-2 border-ink bg-cream p-5">
-          <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="BKC logo" className="w-full max-w-sm" width={360} height={120} />
+          <img
+            src={`${import.meta.env.BASE_URL}logo.svg`}
+            alt="BKC Hinglish logo चूtiya"
+            className="w-full max-w-sm"
+            width={420}
+            height={120}
+          />
           <p className="mt-4 font-mono text-xs uppercase tracking-wider text-ink-45">Logo system</p>
           <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
-            <li>Marigold square mark + BKC wordmark</li>
-            <li>Stacked “Bharat Ka / Chootiya” lockup</li>
-            <li>Favicon: marigold tile, ink letters</li>
+            <li>Marigold square + BKC</li>
+            <li>
+              Hinglish lockup: Devanagari <b>चू</b> + Latin <b>tiya</b>
+            </li>
+            <li>Public spelling: Ch**tiya</li>
           </ul>
         </div>
       </div>
@@ -64,7 +78,13 @@ export function AboutPage() {
         </label>
         <label className="text-xs uppercase">
           Email
-          <input name="email" type="email" autoComplete="email" required className="mt-1 min-h-11 w-full border-2 border-ink bg-cream px-3" />
+          <input
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            className="mt-1 min-h-11 w-full border-2 border-ink bg-cream px-3"
+          />
         </label>
         <label className="text-xs uppercase">
           Message

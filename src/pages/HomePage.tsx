@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FONTS, PRODUCTS, CATEGORIES, bestsellers, newest, type FontKey } from '../data/catalog'
+import { STATES, BRAND } from '../data/states'
 import { useCart } from '../context/CartContext'
 import { money } from '../lib/format'
 import { Tee } from '../components/Tee'
@@ -35,7 +36,7 @@ export function HomePage() {
           style={{ WebkitTextStroke: '2px rgba(14,14,12,0.12)' }}
           aria-hidden
         >
-          CHOOTIYA
+          Ch**tiya
         </div>
 
         <div className="relative z-10 mx-auto grid max-w-[1440px] gap-6 px-[clamp(1rem,0.5rem+2vw,3rem)] py-8 md:grid-cols-[1fr_minmax(260px,42%)_1fr] md:items-center md:py-12 lg:min-h-[min(84vh,780px)]">
@@ -51,7 +52,9 @@ export function HomePage() {
               <span className="inline-block bg-marigold px-2 py-1 leading-none">it out loud</span>
             </h1>
             <p className="max-w-[32ch] text-sm text-ink-70 sm:text-base">
-              One white 240 GSM canvas. Seven typefaces. The brand name, printed exactly as rudely as you want it. Tap a font — the shirt changes live.
+              One white 240 GSM canvas. Soft-censor brand name: {BRAND.softWord}. Hinglish lockup{' '}
+              <span className="font-deva text-chilli">{BRAND.hinglishLockup}</span>. Tap a font — the shirt
+              changes live.
             </p>
             <Link
               to="/shop"
@@ -171,8 +174,49 @@ export function HomePage() {
       <section className="border-y-2 border-ink bg-paper-2 py-12 md:py-16">
         <div className="mx-auto max-w-[1440px] px-[clamp(1rem,0.5rem+2vw,3rem)]">
           <SectionHead
-            eyebrow="02 — Tshirt of everyone"
-            title={<>Everyone<br />gets one</>}
+            eyebrow="02 — The gap nobody else fills"
+            title={
+              <>
+                Shop by where
+                <br />
+                you speak
+              </>
+            }
+            note={BRAND.differentiator}
+          />
+          <div className="mb-4 max-w-2xl text-sm text-ink-70">
+            From Kumaoni <i>चाल जालुं</i> to Malayalam <i>എടാ</i> — day-to-day slang by state and region, one storefront.
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-3 snap-x">
+            {STATES.slice(0, 10).map((s) => (
+              <Link
+                key={s.key}
+                to={`/shop?state=${s.key}`}
+                className="min-w-[140px] snap-start border-2 border-ink bg-cream p-4 hover:bg-marigold"
+              >
+                <span className="text-2xl">{s.glyph}</span>
+                <h3 className="mt-2 font-display text-lg uppercase">{s.label}</h3>
+                <p className="text-xs text-ink-45">{s.regions.map((r) => r.lang).join(' · ')}</p>
+              </Link>
+            ))}
+          </div>
+          <Link to="/states" className="mt-4 inline-flex min-h-11 font-bold uppercase underline">
+            Full India atlas →
+          </Link>
+        </div>
+      </section>
+
+      <section className="border-y-2 border-ink bg-paper-2 py-12 md:py-16">
+        <div className="mx-auto max-w-[1440px] px-[clamp(1rem,0.5rem+2vw,3rem)]">
+          <SectionHead
+            eyebrow="03 — Tshirt of everyone"
+            title={
+              <>
+                Everyone
+                <br />
+                gets one
+              </>
+            }
           />
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             {[
@@ -193,7 +237,7 @@ export function HomePage() {
       </section>
 
       <section className="mx-auto max-w-[1440px] px-[clamp(1rem,0.5rem+2vw,3rem)] py-12 md:py-16">
-        <SectionHead eyebrow="03 — Bestsellers" title="Loudest in the room" />
+        <SectionHead eyebrow="04 — Bestsellers" title="Loudest in the room" />
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 md:gap-4">
           {best.map((p, i) => (
             <ProductCard key={p.id} product={p} index={i} />
@@ -204,7 +248,7 @@ export function HomePage() {
       <section className="border-t-2 border-ink bg-indigo py-12 text-cream md:py-16">
         <div className="mx-auto max-w-[1440px] px-[clamp(1rem,0.5rem+2vw,3rem)]">
           <SectionHead
-            eyebrow="04 — Civic"
+            eyebrow="05 — Civic"
             title={<span className="text-cream">Vote. Ask. Show up.</span>}
             note="Non-partisan turnout and peaceful-assembly prints. No party names, colours or symbols — ever."
           />
@@ -218,7 +262,7 @@ export function HomePage() {
       </section>
 
       <section className="mx-auto max-w-[1440px] px-[clamp(1rem,0.5rem+2vw,3rem)] py-12 md:py-16">
-        <SectionHead eyebrow="05 — New drops" title="Just landed" />
+        <SectionHead eyebrow="06 — New drops" title="Just landed" />
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
           {fresh.map((p, i) => (
             <ProductCard key={p.id} product={p} index={i} />
