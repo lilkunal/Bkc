@@ -1,29 +1,24 @@
 # BKC — Project status
 
-**Updated:** 2026-08-11  
+**Updated:** 2026-08-11 (evening)  
 **Repo:** https://github.com/lilkunal/Bkc  
 **Live:** https://lilkunal.github.io/Bkc/
 
-## Done
+## Differentiator
 
-- Vite + React 19 + TypeScript + Tailwind v4 storefront
-- 138 products (incl. अल्लाह की गाय idiom), shop filters, PDP sticky ATC, cart
-- Pages: Home, Shop, Product, Collections, Occasions, Blog, Market, About, Lookbook, Case Study
-- Logo SVGs, lookbook still from founder face reference
-- Deployed to `gh-pages` branch
+**Shop by where you speak** — state → region → day-to-day slang atlas in one cart. Soft-censor brand: Ch**tiya / चूtiya.
 
-## Next
+## Done this pass
 
-- Enable GitHub Pages source = `gh-pages` / root in repo Settings if URL 404s
-- Add friend face to lookbook when photo arrives
-- Wire case study into Kunal portfolio repo when path is shared
-- Optional: Three.js hero on `md+` (SVG hero ships now)
-- Optional: HeyGen bumper
+- States atlas page + shop filters (state/region)
+- Uttarakhand Kumaon + Garhwal day-to-day prints + pan-India vernacular SKUs
+- Soft-censor hero + Hinglish logo (चू + tiya)
+- Chooser blogs: how to choose, soft-censor, slang atlas, oversized vs regular
 
 ## Local
 
 ```bash
-cd "E:\Code claude\New folder\bkc"
 npm run dev
-# open http://localhost:5173/Bkc/
+# http://localhost:5173/Bkc/states
+# http://localhost:5173/Bkc/shop?state=uttarakhand&region=kumaon
 ```
