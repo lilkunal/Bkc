@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 120" role="img" aria-label="BKC  Bharat Ka Chootiya">
+  <rect width="360" height="120" fill="#F4EFE4"/>
+  <rect x="8" y="8" width="104" height="104" fill="#FFB703" stroke="#0E0E0C" stroke-width="4"/>
+  <text x="60" y="76" text-anchor="middle" font-family="Impact, Anton, sans-serif" font-size="42" fill="#0E0E0C">BKC</text>
+  <text x="132" y="52" font-family="Impact, Anton, sans-serif" font-size="28" fill="#0E0E0C" letter-spacing="1">BHARAT KA</text>
+  <text x="132" y="92" font-family="Impact, Anton, sans-serif" font-size="34" fill="#E01B24" letter-spacing="1">CHOOTIYA</text>
+</svg>

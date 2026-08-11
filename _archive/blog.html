@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Journal — BKC</title>
+<meta name="description" content="BKC's journal: GSM explained, why oversized won, how to design a protest tee without picking a side, the Indian festival calendar, print methods compared, and sizing truth.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Permanent+Marker&family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Rozha+One&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/pages.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23FFB703'/%3E%3Ctext x='50' y='68' text-anchor='middle' font-family='Impact' font-size='42'%3EBKC%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div data-shell="header"></div>
+
+<main id="main">
+  <section class="page-head">
+    <div class="wrap">
+      <p class="eyebrow" data-reveal>The Journal</p>
+      <h1 data-reveal style="--reveal-delay:60ms">Notes from<br>the print room</h1>
+      <p class="lead muted" data-reveal style="--reveal-delay:120ms">
+        Fabric specs, production economics, studio rules and the occasional argument.
+        Written by the people who actually place the fabric orders.
+      </p>
+    </div>
+  </section>
+
+  <section class="section wrap">
+    <div class="row" style="gap:.4rem;flex-wrap:wrap;margin-bottom:var(--sp-6)" data-blog-filters></div>
+    <div class="grid g-3" data-blog-grid></div>
+  </section>
+</main>
+
+<div data-shell="footer"></div>
+<script src="js/data.js"></script>
+<script src="js/tee.js"></script>
+<script src="js/blog-data.js"></script>
+<script src="js/app.js"></script>
+<script>
+BKC.initPage = function () {
+  var active = '';
+  var grid = document.querySelector('[data-blog-grid]');
+  var bar = document.querySelector('[data-blog-filters]');
+  var cats = [];
+  BKC.posts.forEach(function (p) { if (cats.indexOf(p.cat) === -1) cats.push(p.cat); });
+
+  function paint() {
+    var list = active ? BKC.posts.filter(function (p) { return p.cat === active; }) : BKC.posts;
+    grid.innerHTML = list.map(BKC.postCard).join('');
+    document.querySelectorAll('[data-blog-filters] .chip').forEach(function (c) {
+      c.classList.toggle('is-on', c.getAttribute('data-c') === active);
+    });
+    /* Cards are injected after the observer ran, so reveal them directly. */
+    grid.querySelectorAll('[data-reveal]').forEach(function (el) { el.classList.add('is-in'); });
+  }
+
+  bar.innerHTML = '<button class="chip is-on" data-c="">All posts</button>' +
+    cats.map(function (c) { return '<button class="chip" data-c="' + c + '">' + c + '</button>'; }).join('');
+  bar.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-c]');
+    if (!b) return;
+    active = b.getAttribute('data-c');
+    paint();
+  });
+  paint();
+};
+</script>
+</body>
+</html>

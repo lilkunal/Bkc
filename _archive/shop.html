@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shop all tees — BKC</title>
+<meta name="description" content="Every BKC design in one place. Filter by fit, category, occasion, wearer and garment colour.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Permanent+Marker&family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Rozha+One&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/pages.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23FFB703'/%3E%3Ctext x='50' y='68' text-anchor='middle' font-family='Impact' font-size='42'%3EBKC%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div data-shell="header"></div>
+
+<main id="main">
+  <section class="page-head">
+    <div class="wrap">
+      <p class="eyebrow" data-reveal>The full catalogue</p>
+      <h1 data-reveal style="--reveal-delay:60ms">Shop<br>everything</h1>
+      <p class="lead muted" data-reveal style="--reveal-delay:120ms">
+        Four fits, twenty garment colours, sixteen taste categories and twenty-three occasions —
+        all cross-filterable. Your filters live in the URL, so you can send a view to someone.
+      </p>
+    </div>
+  </section>
+
+  <section class="section-sm wrap">
+    <div class="shop-layout">
+      <aside class="filters" data-filters aria-label="Filters"></aside>
+
+      <div>
+        <div class="shop-bar">
+          <div class="row" style="gap:.6rem;flex-wrap:wrap">
+            <span class="shop-count" data-shop-count>—</span>
+            <button class="chip filter-toggle" data-filter-toggle>Filters ▾</button>
+          </div>
+          <div class="row" style="gap:.6rem;flex-wrap:wrap">
+            <label class="shop-search">
+              <input type="search" id="shop-search" name="q" placeholder="Search slogans, colours, cows…" data-shop-search aria-label="Search designs">
+              <span aria-hidden="true">🔍</span>
+            </label>
+            <select class="sort" id="shop-sort" name="sort" data-shop-sort aria-label="Sort by">
+              <option value="popular">Most popular</option>
+              <option value="rating">Highest rated</option>
+              <option value="price-asc">Price: low to high</option>
+              <option value="price-desc">Price: high to low</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid g-auto" data-shop-grid></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div data-shell="footer"></div>
+<script src="js/data.js"></script>
+<script src="js/tee.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

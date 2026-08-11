@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journal — BKC</title>
+<meta name="description" content="A post from the BKC journal.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Permanent+Marker&family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Rozha+One&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/pages.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23FFB703'/%3E%3Ctext x='50' y='68' text-anchor='middle' font-family='Impact' font-size='42'%3EBKC%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div data-shell="header"></div>
+
+<main id="main">
+  <article class="section-sm wrap" data-post></article>
+
+  <section class="section wrap">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow">Keep reading</p>
+        <h2 class="display d-2">More from the Journal</h2>
+      </div>
+      <a class="link-arrow" href="blog.html">All posts →</a>
+    </div>
+    <div class="grid g-3" data-more></div>
+  </section>
+</main>
+
+<div data-shell="footer"></div>
+<script src="js/data.js"></script>
+<script src="js/tee.js"></script>
+<script src="js/blog-data.js"></script>
+<script src="js/app.js"></script>
+<script>
+BKC.initPage = function () {
+  var slug = new URLSearchParams(location.search).get('slug');
+  var p = BKC.postBySlug(slug) || BKC.posts[0];
+  document.title = p.title + ' — BKC Journal';
+
+  document.querySelector('[data-post]').innerHTML =
+    '<div class="breadcrumb"><a href="index.html">Home</a> / <a href="blog.html">Journal</a> / <span>' + p.cat + '</span></div>' +
+    '<div class="article-hero" style="background:' + p.bg + '">' +
+      '<div style="font-size:4rem;line-height:1">' + p.glyph + '</div>' +
+      '<span class="stamp">' + p.cat + '</span>' +
+      '<h1 class="display d-1" style="margin:.6rem 0 .8rem;max-width:20ch">' + p.title + '</h1>' +
+      '<p class="lead" style="margin:0">' + p.dek + '</p>' +
+      '<p class="mono" style="margin:1rem 0 0">' + BKC.formatDate(p.date) + ' · ' + p.read + ' min read</p>' +
+    '</div>' +
+    '<div class="article">' + p.body +
+      '<hr class="rule-thick" style="margin:var(--sp-6) 0">' +
+      '<div class="row-between">' +
+        '<span class="mono">Filed under ' + p.cat + '</span>' +
+        '<a class="btn btn-sm btn-marigold" href="shop.html"><span>Shop the tees →</span></a>' +
+      '</div>' +
+    '</div>';
+
+  var more = BKC.posts.filter(function (q) { return q.slug !== p.slug; }).slice(0, 3);
+  document.querySelector('[data-more]').innerHTML = more.map(BKC.postCard).join('');
+  document.querySelectorAll('[data-reveal]').forEach(function (el) { el.classList.add('is-in'); });
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+/* ==========================================================================
+   BKC — Design Tokens
+   Direction: Indian street-poster / riso-print neo-brutalism.
+   Newsprint paper, ink-black rules, marigold + chilli + indigo riso inks.
+   ========================================================================== */
+
+:root {
+  /* --- Ink & paper ------------------------------------------------------ */
+  --ink:          #0E0E0C;
+  --ink-70:       rgba(14, 14, 12, 0.7);
+  --ink-45:       rgba(14, 14, 12, 0.45);
+  --ink-18:       rgba(14, 14, 12, 0.18);
+  --ink-08:       rgba(14, 14, 12, 0.08);
+  --paper:        #F4EFE4;
+  --paper-2:      #EAE2D1;
+  --paper-3:      #DED3BC;
+  --white:        #FFFDF8;
+
+  /* --- Riso inks -------------------------------------------------------- */
+  --saffron:      #FF6A00;
+  --marigold:     #FFB703;
+  --chilli:       #E01B24;
+  --indigo:       #16256B;
+  --mint:         #0FA678;
+  --sky:          #2CA6E0;
+  --pride-pink:   #FF3D8B;
+  --pride-violet: #8B3DFF;
+
+  /* --- Semantic --------------------------------------------------------- */
+  --accent:       var(--chilli);
+  --accent-soft:  var(--marigold);
+  --surface:      var(--white);
+  --rule:         var(--ink);
+  --sale:         var(--chilli);
+  --instock:      var(--mint);
+
+  /* --- Type ------------------------------------------------------------- */
+  --font-display: 'Anton', 'Arial Narrow', 'Haettenschweiler', sans-serif;
+  --font-alt:     'Bebas Neue', 'Anton', Impact, sans-serif;
+  --font-body:    'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --font-mono:    'Space Mono', ui-monospace, 'Cascadia Mono', monospace;
+  --font-deva:    'Rozha One', 'Nirmala UI', serif;
+  --font-marker:  'Permanent Marker', 'Comic Sans MS', cursive;
+  --font-serif:   'Playfair Display', Georgia, serif;
+
+  --t-micro:  0.6875rem;
+  --t-xs:     clamp(0.75rem, 0.73rem + 0.1vw, 0.8125rem);
+  --t-sm:     clamp(0.8125rem, 0.79rem + 0.12vw, 0.9375rem);
+  --t-base:   clamp(0.9375rem, 0.9rem + 0.2vw, 1.0625rem);
+  --t-lg:     clamp(1.125rem, 1.05rem + 0.4vw, 1.375rem);
+  --t-xl:     clamp(1.5rem, 1.3rem + 0.9vw, 2.25rem);
+  --t-2xl:    clamp(2rem, 1.5rem + 2.2vw, 3.5rem);
+  --t-3xl:    clamp(2.75rem, 1.6rem + 5vw, 6rem);
+  --t-hero:   clamp(3.25rem, 1rem + 10vw, 11rem);
+
+  /* --- Space ------------------------------------------------------------ */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 3rem;
+  --sp-8: 4rem;
+  --sp-section: clamp(3.5rem, 2.5rem + 4.5vw, 8rem);
+  --gutter: clamp(1rem, 0.5rem + 2vw, 3rem);
+  --maxw: 1440px;
+
+  /* --- Structure -------------------------------------------------------- */
+  --border: 2px solid var(--ink);
+  --border-thick: 3px solid var(--ink);
+  --radius: 0px;
+  --radius-pill: 999px;
+  --shadow-hard: 6px 6px 0 var(--ink);
+  --shadow-hard-sm: 4px 4px 0 var(--ink);
+  --shadow-soft: 0 18px 40px -18px rgba(14, 14, 12, 0.45);
+
+  /* --- Motion ----------------------------------------------------------- */
+  --dur-1: 140ms;
+  --dur-2: 260ms;
+  --dur-3: 460ms;
+  --dur-4: 800ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --header-h: 62px;
+}
+
+/* Newsprint grain, applied as a repeating SVG noise layer. */
+:root {
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.42'/%3E%3C/svg%3E");
+  --halftone: radial-gradient(circle at 1px 1px, var(--ink-18) 1px, transparent 1.4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-1: 1ms;
+    --dur-2: 1ms;
+    --dur-3: 1ms;
+    --dur-4: 1ms;
+  }
+}

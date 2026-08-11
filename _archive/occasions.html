@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Occasion calendar — BKC</title>
+<meta name="description" content="A t-shirt for every occasion in India: Diwali, Holi, Onam, Pongal, Eid, Navratri, Durga Puja, Raksha Bandhan, Chhath, shaadi season, board exams, monsoon, cricket — plus polling day and peaceful protest.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Permanent+Marker&family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Rozha+One&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/pages.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23FFB703'/%3E%3Ctext x='50' y='68' text-anchor='middle' font-family='Impact' font-size='42'%3EBKC%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div data-shell="header"></div>
+
+<main id="main">
+  <section class="page-head">
+    <div class="wrap">
+      <p class="eyebrow" data-reveal>The Indian year, printed</p>
+      <h1 data-reveal style="--reveal-delay:60ms">Every<br>occasion</h1>
+      <p class="lead muted" data-reveal style="--reveal-delay:120ms">
+        Twenty-three drops mapped to the calendar people actually live by — national festivals,
+        regional ones the big platforms skip, exam season, the monsoon, cricket, shaadi season,
+        and the two civic occasions everyone else avoids.
+      </p>
+    </div>
+  </section>
+
+  <!-- Civic feature -->
+  <section class="section-sm wrap">
+    <div class="notice" data-reveal style="border-left-color:var(--indigo)">
+      <p class="eyebrow" style="margin-bottom:.6rem">🗳️ Civic drops — read this first</p>
+      <h2 class="display d-3" style="margin-bottom:.6rem">Voting and protest, without a side</h2>
+      <p style="margin:0 0 .8rem;max-width:70ch">
+        We print for polling day and for peaceful assembly, and we hold a hard line while doing it:
+        <b>no party names, no party colours, no party symbols, and never the national flag on fabric.</b>
+        Our civic tees argue for the mechanism — turn up, ask questions, read the constitution, do it
+        peacefully — not for an outcome. That is what makes them safe to wear anywhere, including
+        inside a polling station.
+      </p>
+      <div class="row" style="gap:.6rem;flex-wrap:wrap">
+        <a class="btn btn-sm" href="shop.html?occ=voting"><span>Voting day tees →</span></a>
+        <a class="btn btn-sm btn-paper" href="shop.html?occ=protest"><span>Protest tees →</span></a>
+        <a class="btn btn-sm btn-paper" href="post.html?slug=protest-tee-without-a-side"><span>Read our five rules →</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-sm wrap">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow" data-reveal>Month by month</p>
+        <h2 class="display d-1" data-reveal style="--reveal-delay:60ms">The calendar</h2>
+      </div>
+      <p class="sec-note" data-reveal>Lunar festivals shift each year — dates shown are the usual window.
+        Production starts roughly eight weeks before each drop goes live.</p>
+    </div>
+    <div data-calendar></div>
+  </section>
+
+  <div class="marquee marquee-alt">
+    <div class="marquee-track">
+      <span>DIWALI</span><span>HOLI</span><span>ONAM</span><span>PONGAL</span><span>EID</span><span>CHHATH</span><span>NAVRATRI</span>
+    </div>
+  </div>
+
+  <section class="section wrap">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow" data-reveal>Shopping the season</p>
+        <h2 class="display d-1" data-reveal style="--reveal-delay:60ms">Occasion<br>bestsellers</h2>
+      </div>
+      <a class="link-arrow" href="shop.html?cat=festive" data-reveal>All festival tees →</a>
+    </div>
+    <div class="grid g-auto" data-occ-best></div>
+  </section>
+</main>
+
+<div data-shell="footer"></div>
+<script src="js/data.js"></script>
+<script src="js/tee.js"></script>
+<script src="js/app.js"></script>
+<script>
+BKC.initPage = function () {
+  var H = BKC.helpers;
+  var MONTHS = ['Year-round', 'January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'];
+
+  var cal = document.querySelector('[data-calendar]');
+  if (cal) {
+    var groups = {};
+    BKC.occasions.forEach(function (o) {
+      (groups[o.month] = groups[o.month] || []).push(o);
+    });
+    var months = Object.keys(groups).map(Number).sort(function (a, b) { return a - b; });
+    cal.innerHTML = months.map(function (m) {
+      return '<div style="margin-bottom:var(--sp-6)" data-reveal>' +
+        '<div class="row" style="gap:1rem;margin-bottom:var(--sp-4)">' +
+          '<h3 class="display d-3">' + MONTHS[m] + '</h3>' +
+          '<hr class="rule" style="flex:1">' +
+          '<span class="mono">' + groups[m].length + ' drop' + (groups[m].length === 1 ? '' : 's') + '</span>' +
+        '</div>' +
+        '<div class="occ-grid">' + groups[m].map(function (o) {
+          var n = H.inOccasion(o.key).length;
+          var civic = (o.key === 'voting' || o.key === 'protest');
+          return '<a class="occ-card' + (civic ? ' is-flag' : '') + '" href="shop.html?occ=' + o.key + '">' +
+            '<span class="glyph">' + o.glyph + '</span>' +
+            '<span class="when">' + o.when + '</span>' +
+            '<h3>' + o.label + '</h3>' +
+            '<p>' + o.note + '</p>' +
+            '<span class="count">' + n + ' design' + (n === 1 ? '' : 's') + ' →</span>' +
+          '</a>';
+        }).join('') + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  var best = BKC.products.filter(function (p) {
+    return p.occasions.indexOf('everyday') === -1;
+  }).sort(function (a, b) { return b.reviews - a.reviews; }).slice(0, 8);
+  BKC.renderGrid('[data-occ-best]', best);
+};
+</script>
+</body>
+</html>
