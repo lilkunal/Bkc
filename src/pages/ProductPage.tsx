@@ -2,13 +2,15 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { COLORS, FITS, getProductById, relatedProducts, type ColorKey, type FitKey } from '../data/catalog'
 import { useCart } from '../context/CartContext'
-import { discount, money } from '../lib/format'
+import { money } from '../lib/format'
 import { Tee } from '../components/Tee'
-import { ProductCard } from '../components/ProductCard'
+import { Price, ProductCard, RowHead, TrustBar } from '../components/ProductCard'
 
 function isColorKey(k: string): k is ColorKey {
   return Object.prototype.hasOwnProperty.call(COLORS, k)
 }
+
+type Toast = { tone: 'ok' | 'err'; msg: string } | null
 
 export function ProductPage() {
   const { id } = useParams()
@@ -20,25 +22,30 @@ export function ProductPage() {
   const [fit, setFit] = useState<FitKey>(product?.fit || 'oversized')
   const [color, setColor] = useState<ColorKey>(product?.color || 'white')
   const [size, setSize] = useState('')
-  const [toast, setToast] = useState('')
+  const [toast, setToast] = useState<Toast>(null)
 
   useEffect(() => {
     if (product) {
       setFit(product.fit)
       setColor(product.color)
       setSize('')
+      setToast(null)
     }
   }, [product])
 
   useEffect(() => {
     const el = buyRef.current
     if (!el) return
-    const io = new IntersectionObserver(([e]) => setStuck(!e.isIntersecting), {
-      threshold: 0,
-    })
+    const io = new IntersectionObserver(([e]) => setStuck(!e.isIntersecting), { threshold: 0 })
     io.observe(el)
     return () => io.disconnect()
   }, [product])
+
+  useEffect(() => {
+    if (toast?.tone !== 'ok') return
+    const t = window.setTimeout(() => setToast(null), 2200)
+    return () => window.clearTimeout(t)
+  }, [toast])
 
   const colorMeta = COLORS[color]
   const fitMeta = FITS[fit]
@@ -52,10 +59,11 @@ export function ProductPage() {
 
   if (!product) {
     return (
-      <div className="mx-auto max-w-lg px-4 py-20 text-center">
-        <h1 className="font-display text-3xl uppercase">Tee not found</h1>
-        <Link to="/shop" className="mt-4 inline-block underline">
-          Back to shop
+      <div className="shell grid justify-items-center gap-5 py-24 text-center">
+        <h1 className="h-section">Tee not found</h1>
+        <p className="lede">That design may have been retired, or the link is off by a letter.</p>
+        <Link to="/shop" className="btn btn-secondary">
+          Back to the shop
         </Link>
       </div>
     )
@@ -65,7 +73,7 @@ export function ProductPage() {
 
   const add = () => {
     if (!size) {
-      setToast('Pick a size first')
+      setToast({ tone: 'err', msg: 'Pick a size first.' })
       return
     }
     addItem({
@@ -83,68 +91,60 @@ export function ProductPage() {
       backdrop: product.backdrop,
       backdropHex: product.backdropHex,
     })
-    setToast('Added to bag')
-    window.setTimeout(() => setToast(''), 1800)
+    setToast({ tone: 'ok', msg: 'Added to bag.' })
   }
 
+  const specs: [string, string][] = [
+    ['GSM', String(fitMeta.gsm)],
+    ['Print', 'Water-based screen'],
+    ['SKU', product.id],
+    ['Ships', '48 hours (demo)'],
+  ]
+
   return (
-    <div className="mx-auto max-w-[1440px] px-[clamp(1rem,0.5rem+2vw,3rem)] py-6 md:py-10">
-      <nav className="mb-4 text-xs text-ink-45">
-        <Link to="/shop" className="underline">
+    <div className="shell py-8 md:py-12">
+      <nav aria-label="Breadcrumb" className="micro mb-6">
+        <Link to="/shop" className="u">
           Shop
-        </Link>{' '}
-        / {product.name}
+        </Link>
+        <span aria-hidden="true" className="mx-2 text-faint">
+          /
+        </span>
+        <span className="text-bone">{product.name}</span>
       </nav>
 
-      <div className="grid gap-8 lg:grid-cols-2">
-        <div className="border-2 border-ink bg-paper-2 p-4 sm:p-8">
-          <Tee
-            product={product}
-            fit={fit}
-            teeHex={colorMeta.hex}
-            printHex={colorMeta.ink}
-            detail="high"
-            className="mx-auto max-w-md"
-          />
+      <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
+        <div className="spot self-start p-6 sm:p-12">
+          <Tee product={product} fit={fit} teeHex={colorMeta.hex} printHex={colorMeta.ink} detail="high" className="mx-auto max-w-md" />
         </div>
 
         <div>
-          {product.badge && (
-            <span className="border-2 border-ink bg-marigold px-2 py-1 font-mono text-xs uppercase">
-              {product.badge}
-            </span>
-          )}
-          <h1 className="mt-3 font-display text-[clamp(1.8rem,1rem+2vw,3rem)] uppercase leading-none">
+          {product.badge && <span className="chip chip-active">{product.badge}</span>}
+          <h1 className="mt-4 font-display text-[clamp(2rem,1.2rem+2.2vw,3.25rem)] font-medium uppercase leading-[1.04] tracking-[0.02em]">
             {product.name}
           </h1>
-          <p className="mt-2 text-sm text-ink-70">
+          <p className="micro mt-3">
             ★ {product.rating.toFixed(1)} · {product.reviews.toLocaleString('en-IN')} reviews
           </p>
-          <div className="mt-3 flex items-baseline gap-3">
-            <span className="font-mono text-2xl font-bold">{money(product.price)}</span>
-            <span className="font-mono text-ink-45 line-through">{money(product.mrp)}</span>
-            <span className="text-chilli">{discount(product.price, product.mrp)}% off</span>
-          </div>
-          <p className="mt-4 max-w-prose text-sm text-ink-70">
-            {product.desc ||
-              `${product.name} — printed on ${fitMeta.label} ${fitMeta.gsm} GSM cotton.`}
+          <Price price={product.price} mrp={product.mrp} className="mt-4 text-2xl" />
+          <p className="lede mt-5 max-w-prose">
+            {product.desc || `${product.name}, printed on ${fitMeta.label} ${fitMeta.gsm} GSM cotton.`}
           </p>
 
-          <div ref={buyRef} className="mt-6 space-y-5">
+          <div ref={buyRef} className="mt-8 grid gap-7">
             <fieldset>
-              <legend className="mb-2 text-xs uppercase tracking-wide">Fit</legend>
+              <legend className="field-label mb-3">Fit</legend>
               <div className="flex flex-wrap gap-2">
                 {Object.values(FITS).map((f) => (
                   <button
                     key={f.key}
                     type="button"
+                    aria-pressed={fit === f.key}
                     onClick={() => {
                       setFit(f.key)
                       setSize('')
                     }}
-                    className={`min-h-11 border-2 border-ink px-3 text-sm ${
-                      fit === f.key ? 'bg-ink text-cream' : 'bg-cream'
-                    }`}
+                    className="chip-btn"
                   >
                     {f.label}
                   </button>
@@ -153,15 +153,18 @@ export function ProductPage() {
             </fieldset>
 
             <fieldset>
-              <legend className="mb-2 text-xs uppercase tracking-wide">Colour — {colorMeta.name}</legend>
-              <div className="flex flex-wrap gap-2">
+              <legend className="field-label mb-3">
+                Colour · <span className="text-bone">{colorMeta.name}</span>
+              </legend>
+              <div className="flex flex-wrap gap-3">
                 {colourOptions.map((k) => (
                   <button
                     key={k}
                     type="button"
                     aria-label={COLORS[k].name}
+                    aria-pressed={color === k}
                     onClick={() => setColor(k)}
-                    className={`h-11 w-11 border-2 ${color === k ? 'border-chilli ring-2 ring-chilli' : 'border-ink'}`}
+                    className="swatch"
                     style={{ background: COLORS[k].hex }}
                   />
                 ))}
@@ -169,16 +172,18 @@ export function ProductPage() {
             </fieldset>
 
             <fieldset>
-              <legend className="mb-2 text-xs uppercase tracking-wide">Size</legend>
+              <legend className="field-label mb-3">Size</legend>
               <div className="flex flex-wrap gap-2">
                 {sizes.map((s) => (
                   <button
                     key={s}
                     type="button"
-                    onClick={() => setSize(s)}
-                    className={`min-h-11 min-w-11 border-2 border-ink px-3 ${
-                      size === s ? 'bg-marigold' : 'bg-cream'
-                    }`}
+                    aria-pressed={size === s}
+                    onClick={() => {
+                      setSize(s)
+                      setToast(null)
+                    }}
+                    className="size-btn"
                   >
                     {s}
                   </button>
@@ -186,41 +191,35 @@ export function ProductPage() {
               </div>
             </fieldset>
 
-            <button
-              type="button"
-              onClick={add}
-              className="min-h-12 w-full border-2 border-ink bg-chilli font-bold uppercase text-cream hard-shadow sm:w-auto sm:px-10"
-            >
-              Add to bag
-            </button>
-            {toast && <p className="font-mono text-sm text-mint">{toast}</p>}
+            <div className="grid gap-2">
+              <button type="button" onClick={add} className="btn btn-primary w-full sm:w-auto sm:justify-self-start sm:px-12">
+                Add to bag · {money(product.price)}
+              </button>
+              <p role="status" className={`min-h-[1.4em] text-sm ${toast?.tone === 'err' ? 'text-error' : 'text-success'}`}>
+                {toast?.msg}
+              </p>
+            </div>
           </div>
 
-          <dl className="mt-8 grid gap-2 border-t-2 border-ink pt-6 text-sm sm:grid-cols-2">
-            <div>
-              <dt className="text-ink-45">GSM</dt>
-              <dd>{fitMeta.gsm}</dd>
-            </div>
-            <div>
-              <dt className="text-ink-45">Print</dt>
-              <dd>Water-based screen</dd>
-            </div>
-            <div>
-              <dt className="text-ink-45">SKU</dt>
-              <dd className="font-mono">{product.id}</dd>
-            </div>
-            <div>
-              <dt className="text-ink-45">Ships</dt>
-              <dd>48 hours (demo)</dd>
-            </div>
+          <dl className="mt-6 grid gap-5 border-t border-line pt-6 text-sm sm:grid-cols-2">
+            {specs.map(([term, value]) => (
+              <div key={term}>
+                <dt className="field-label">{term}</dt>
+                <dd className="mt-1">{value}</dd>
+              </div>
+            ))}
           </dl>
         </div>
       </div>
 
+      <div className="mt-14">
+        <TrustBar />
+      </div>
+
       {related.length > 0 && (
-        <section className="mt-14">
-          <h2 className="mb-4 font-display text-2xl uppercase">Related</h2>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <section className="mt-16" aria-labelledby="related-title">
+          <RowHead title="You may also like" id="related-title" to="/shop" />
+          <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-4">
             {related.map((p, i) => (
               <ProductCard key={p.id} product={p} index={i} />
             ))}
@@ -229,15 +228,12 @@ export function ProductPage() {
       )}
 
       {stuck && (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-ink bg-paper p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:hidden">
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-md md:hidden">
           <div className="flex gap-2">
-            <select
-              name="sticky-size"
-              aria-label="Size"
-              value={size}
-              onChange={(e) => setSize(e.target.value)}
-              className="min-h-12 flex-1 border-2 border-ink bg-cream px-2"
-            >
+            <label htmlFor="sticky-size" className="sr-only">
+              Size
+            </label>
+            <select id="sticky-size" value={size} onChange={(e) => setSize(e.target.value)} className="select flex-1">
               <option value="">Size</option>
               {sizes.map((s) => (
                 <option key={s} value={s}>
@@ -245,11 +241,7 @@ export function ProductPage() {
                 </option>
               ))}
             </select>
-            <button
-              type="button"
-              onClick={add}
-              className="min-h-12 flex-[1.4] border-2 border-ink bg-chilli font-bold uppercase text-cream"
-            >
+            <button type="button" onClick={add} className="btn btn-primary flex-[1.4] px-3">
               Add · {money(product.price)}
             </button>
           </div>

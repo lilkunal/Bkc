@@ -1,99 +1,108 @@
+import { useState } from 'react'
 import { FITS } from '../data/catalog'
 import { BRAND } from '../data/states'
 import { SectionHead } from '../components/ProductCard'
+import { Wordmark } from '../components/Brand'
 
 export function AboutPage() {
+  const [sent, setSent] = useState(false)
+
   return (
-    <div className="mx-auto max-w-[1440px] px-[clamp(1rem,0.5rem+2vw,3rem)] py-8 md:py-12">
+    <div className="shell py-10 md:py-14">
       <SectionHead
+        level={1}
         eyebrow="The label"
         title={
           <>
-            Bharat Ka
-            <br />
-            <span className="font-deva text-chilli">चू</span>
-            <span className="text-chilli">tiya</span>
+            Bharat Ka <span className="font-deva font-normal text-gold">चू</span>tiya
           </>
         }
         note={`${BRAND.motto} Soft-censor spelling: ${BRAND.softWord}.`}
       />
 
-      <div className="grid gap-8 lg:grid-cols-2">
-        <div className="space-y-4 text-sm text-ink-70">
+      <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr]">
+        <div className="grid content-start gap-5 text-muted">
           <p>
             BKC is an Indian printed-tee label that treats day-to-day language as the product. Not just Hindi memes —
             Kumaoni, Garhwali, Punjabi, Deccani, Tamil, Malayalam, Bangla, and the rest, filterable by state and region.
           </p>
           <p>
             The word started as a gaali. India already uses it as affectionate “idiot.” We print it as{' '}
-            <b>{BRAND.softWord}</b> and as the Hinglish lockup <b className="font-deva">{BRAND.hinglishLockup}</b> so
-            people smile before they flinch — until flinching stops being the default.
+            <b className="font-medium text-bone">{BRAND.softWord}</b> and as the Hinglish lockup{' '}
+            <b className="font-deva font-normal text-gold">{BRAND.hinglishLockup}</b> so people smile before they flinch —
+            until flinching stops being the default.
           </p>
           <p>
-            <b>Our one gap vs ecommerce:</b> {BRAND.differentiator}
+            <b className="font-medium text-bone">Our one gap vs ecommerce:</b> {BRAND.differentiator}
           </p>
         </div>
-        <div className="border-2 border-ink bg-cream p-5">
-          <img
-            src={`${import.meta.env.BASE_URL}logo.svg`}
-            alt="BKC Hinglish logo चूtiya"
-            className="w-full max-w-sm"
-            width={420}
-            height={120}
-          />
-          <p className="mt-4 font-mono text-xs uppercase tracking-wider text-ink-45">Logo system</p>
-          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
-            <li>Marigold square + BKC</li>
+
+        <aside className="grid content-start justify-items-start gap-5 border border-line bg-surface p-8" aria-labelledby="logo-title">
+          <Wordmark align="start" />
+          <h2 id="logo-title" className="field-label mt-2">
+            Logo system
+          </h2>
+          <ul className="grid gap-2 text-sm text-muted">
             <li>
-              Hinglish lockup: Devanagari <b>चू</b> + Latin <b>tiya</b>
+              Seal: <b className="font-deva font-normal text-gold">चू</b> inside a double gold ring
             </li>
+            <li>Wordmark: BKC in Cormorant Garamond, wide-tracked</li>
             <li>Public spelling: Ch**tiya</li>
+            <li>Gold #C9A24A on warm black #0B0A08</li>
           </ul>
+        </aside>
+      </div>
+
+      <section id="fits" className="mt-20 scroll-mt-32" aria-labelledby="fits-title">
+        <SectionHead eyebrow="Fits & GSM" title="Four cuts" id="fits-title" />
+        <div className="grid border-l border-t border-line sm:grid-cols-2 lg:grid-cols-4">
+          {Object.values(FITS).map((f) => (
+            <article key={f.key} className="grid content-start gap-2 border-b border-r border-line p-6">
+              <h3 className="font-display text-2xl font-semibold uppercase tracking-[0.05em]">{f.label}</h3>
+              <p className="eyebrow">{f.gsm} GSM</p>
+              <p className="text-sm text-muted">{f.blurb}</p>
+              <p className="micro mt-2">Sizes: {f.sizes.join(', ')}</p>
+            </article>
+          ))}
         </div>
-      </div>
+      </section>
 
-      <h2 className="mb-4 mt-12 font-display text-2xl uppercase">Fits & GSM</h2>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {Object.values(FITS).map((f) => (
-          <article key={f.key} className="border-2 border-ink bg-cream p-4">
-            <h3 className="font-display text-lg uppercase">{f.label}</h3>
-            <p className="mt-1 font-mono text-xs">{f.gsm} GSM</p>
-            <p className="mt-2 text-sm text-ink-70">{f.blurb}</p>
-            <p className="mt-2 text-xs text-ink-45">Sizes: {f.sizes.join(', ')}</p>
-          </article>
-        ))}
-      </div>
-
-      <h2 className="mb-4 mt-12 font-display text-2xl uppercase">Contact</h2>
-      <form
-        className="grid max-w-lg gap-3"
-        onSubmit={(e) => {
-          e.preventDefault()
-          alert('Demo form — message not sent.')
-        }}
-      >
-        <label className="text-xs uppercase">
-          Name
-          <input name="name" autoComplete="name" required className="mt-1 min-h-11 w-full border-2 border-ink bg-cream px-3" />
-        </label>
-        <label className="text-xs uppercase">
-          Email
-          <input
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            className="mt-1 min-h-11 w-full border-2 border-ink bg-cream px-3"
-          />
-        </label>
-        <label className="text-xs uppercase">
-          Message
-          <textarea name="message" required rows={4} className="mt-1 w-full border-2 border-ink bg-cream px-3 py-2" />
-        </label>
-        <button type="submit" className="min-h-12 border-2 border-ink bg-ink font-bold uppercase text-cream">
-          Send (demo)
-        </button>
-      </form>
+      <section id="contact" className="mt-20 scroll-mt-32" aria-labelledby="contact-title">
+        <SectionHead eyebrow="Contact" title="Write to us" id="contact-title" />
+        <form
+          className="grid max-w-lg gap-5"
+          onSubmit={(e) => {
+            e.preventDefault()
+            setSent(true)
+            e.currentTarget.reset()
+          }}
+        >
+          <div className="grid gap-1.5">
+            <label htmlFor="contact-name" className="field-label">
+              Name
+            </label>
+            <input id="contact-name" name="name" autoComplete="name" required className="input" />
+          </div>
+          <div className="grid gap-1.5">
+            <label htmlFor="contact-email" className="field-label">
+              Email
+            </label>
+            <input id="contact-email" name="email" type="email" autoComplete="email" required className="input" />
+          </div>
+          <div className="grid gap-1.5">
+            <label htmlFor="contact-message" className="field-label">
+              Message
+            </label>
+            <textarea id="contact-message" name="message" required rows={5} className="input" />
+          </div>
+          <button type="submit" className="btn btn-primary justify-self-start">
+            Send message
+          </button>
+          <p role="status" className="min-h-[1.4em] text-sm text-success">
+            {sent ? 'Demo store: your message was not sent anywhere.' : ''}
+          </p>
+        </form>
+      </section>
     </div>
   )
 }

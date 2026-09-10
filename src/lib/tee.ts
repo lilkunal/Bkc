@@ -537,3 +537,9 @@ export function renderProductTee(
 
 export const teeFits = Object.keys(SHAPES)
 export const teeBackdrops = Object.keys(BACKDROPS)
+
+/** Silhouette path + print anchor for a fit. Used by the 3D hero tee so 2D and 3D match. */
+export function teeShape(fit?: string): { body: string; print: PrintAnchor } {
+  const shape = SHAPES[fit || ''] || SHAPES.regular
+  return { body: shape.body, print: shape.print }
+}

@@ -1,5 +1,5 @@
 import { Link, useSearchParams } from 'react-router-dom'
-import { STATES, BRAND } from '../data/states'
+import { BRAND, STATES } from '../data/states'
 import { filterProducts } from '../data/catalog'
 import { SectionHead } from '../components/ProductCard'
 
@@ -8,8 +8,9 @@ export function StatesPage() {
   const focus = params.get('state') || ''
 
   return (
-    <div className="mx-auto max-w-[1440px] px-[clamp(1rem,0.5rem+2vw,3rem)] py-8 md:py-12">
+    <div className="shell py-10 md:py-14">
       <SectionHead
+        level={1}
         eyebrow="India vernacular atlas"
         title={
           <>
@@ -21,16 +22,18 @@ export function StatesPage() {
         note={BRAND.differentiator}
       />
 
-      <div className="mb-8 border-2 border-ink bg-marigold/40 p-4 text-sm md:p-5">
-        <p className="font-display text-lg uppercase">The one thing others don’t ship</p>
-        <p className="mt-2 max-w-3xl text-ink-70">
-          Puneri Paati owns Pune. Hyderabadi slang shops own one city. Bewakoof owns pan-Hindi memes.
-          Nobody lets a Kumaoni filter Kumaon and a Mallu filter Malayalam in the <b>same cart</b> —
-          state → region → day-to-day language. That’s BKC.
+      <section className="mb-12 grid gap-3 border border-line bg-surface p-6 md:p-8" aria-labelledby="gap-title">
+        <h2 id="gap-title" className="eyebrow">
+          The one thing others don’t ship
+        </h2>
+        <p className="max-w-3xl text-muted">
+          Puneri Paati owns Pune. Hyderabadi slang shops own one city. Bewakoof owns pan-Hindi memes. Nobody lets a Kumaoni
+          filter Kumaon and a Mallu filter Malayalam in the <b className="font-medium text-bone">same cart</b>: state → region
+          → day-to-day language. That’s BKC.
         </p>
-      </div>
+      </section>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {STATES.map((s) => {
           const count = filterProducts({ state: s.key }).length
           const active = focus === s.key
@@ -38,37 +41,33 @@ export function StatesPage() {
             <article
               key={s.key}
               id={s.key}
-              className={`border-2 border-ink bg-cream p-4 ${active ? 'ring-4 ring-marigold' : ''}`}
+              className={`grid scroll-mt-32 content-start border p-6 ${active ? 'border-gold' : 'border-line'}`}
+              aria-labelledby={`${s.key}-title`}
             >
-              <div className="flex items-start justify-between gap-2">
-                <span className="text-3xl" aria-hidden>
-                  {s.glyph}
-                </span>
-                <span className="font-mono text-[10px] uppercase text-ink-45">{count} tees</span>
+              <div className="flex items-baseline justify-between gap-3">
+                <h2 id={`${s.key}-title`} className="font-display text-[1.75rem] font-semibold uppercase tracking-[0.05em]">
+                  {s.label}
+                </h2>
+                <span className="micro shrink-0">{count} tees</span>
               </div>
-              <h2 className="mt-2 font-display text-2xl uppercase">{s.label}</h2>
-              <p className="mt-1 text-sm text-ink-70">{s.note}</p>
-              <ul className="mt-3 space-y-2">
+              <p className="mt-2 text-sm text-muted">{s.note}</p>
+              <ul className="mt-5 grid border-t border-line">
                 {s.regions.map((r) => (
-                  <li key={r.key}>
-                    <Link
-                      to={`/shop?state=${s.key}&region=${r.key}`}
-                      className="flex min-h-11 items-center justify-between border border-ink/30 bg-paper-2 px-3 text-sm hover:bg-marigold"
-                    >
+                  <li key={r.key} className="border-b border-line">
+                    <Link to={`/shop?state=${s.key}&region=${r.key}`} className="group flex min-h-12 items-center justify-between gap-3 py-3">
                       <span>
-                        <b>{r.label}</b>
-                        <span className="text-ink-45"> · {r.lang}</span>
+                        <b className="font-medium transition-colors group-hover:text-gold">{r.label}</b>
+                        <span className="text-muted"> · {r.lang}</span>
+                        <span className="mt-0.5 block text-xs text-muted">{r.note}</span>
                       </span>
-                      <span aria-hidden>→</span>
+                      <span aria-hidden="true" className="text-gold">
+                        →
+                      </span>
                     </Link>
-                    <p className="mt-1 px-1 text-xs text-ink-45">{r.note}</p>
                   </li>
                 ))}
               </ul>
-              <Link
-                to={`/shop?state=${s.key}`}
-                className="mt-4 inline-flex min-h-11 items-center font-bold uppercase underline"
-              >
+              <Link to={`/shop?state=${s.key}`} className="u micro mt-5 justify-self-start text-gold">
                 All {s.label} →
               </Link>
             </article>

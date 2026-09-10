@@ -1,273 +1,319 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Component, Suspense, lazy, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
-import { FONTS, PRODUCTS, CATEGORIES, bestsellers, newest, type FontKey } from '../data/catalog'
-import { STATES, BRAND } from '../data/states'
+import { FITS, FONTS, PRODUCTS, bestsellers, filterProducts, getProductById, newest, type FontKey, type Product } from '../data/catalog'
+import { STATES } from '../data/states'
 import { useCart } from '../context/CartContext'
-import { money } from '../lib/format'
 import { Tee } from '../components/Tee'
-import { Marquee, ProductCard, SectionHead } from '../components/ProductCard'
+import { Ornament, Price, ProductCard, RowHead, SectionHead, TrustBar } from '../components/ProductCard'
+
+const Tee3D = lazy(() => import('../components/Tee3D'))
 
 const FONT_KEYS = Object.keys(FONTS) as FontKey[]
+const FONT_NAMES: Record<FontKey, string> = {
+  anton: 'Anton',
+  bebas: 'Bebas',
+  rozha: 'Rozha',
+  marker: 'Marker',
+  playfair: 'Playfair',
+  mono: 'Mono',
+  grotesk: 'Grotesk',
+}
 
-export function HomePage() {
-  const hero = PRODUCTS[0]
-  const [fontKey, setFontKey] = useState<FontKey>((hero.fontKey as FontKey) || 'anton')
+const HERO = PRODUCTS[0]
+const REGIONAL_COUNT = PRODUCTS.filter((p) => p.state).length
+const REGION_COUNT = STATES.reduce((n, s) => n + s.regions.length, 0)
+
+const firstOr = (list: Product[]) => list[0] ?? PRODUCTS[0]
+
+const TILES = [
+  { label: 'Desi Humour', to: '/shop?cat=humour', product: firstOr(filterProducts({ cat: 'humour' })) },
+  { label: 'State Slang', to: '/states', product: firstOr(filterProducts({ cat: 'slang' })) },
+  { label: 'Festival Drops', to: '/occasions', product: firstOr(filterProducts({ cat: 'festive' })) },
+  { label: 'The Monogram', to: '/product/BKC-1002', product: getProductById('BKC-1002') ?? PRODUCTS[1] },
+]
+
+const AUDIENCES = [
+  { to: '/shop?aud=men', title: 'Men', note: 'Oversized + classic' },
+  { to: '/shop?aud=women', title: 'Women', note: 'Crop, oversized, regular' },
+  { to: '/shop?cat=pride', title: 'Pride', note: 'Stocked all year' },
+  { to: '/shop?fit=kids', title: 'Kids', note: 'Skin-safe inks' },
+  { to: '/shop?cat=animals', title: 'Animals', note: 'Cows, strays, insects' },
+]
+
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(() => typeof window !== 'undefined' && window.matchMedia(query).matches)
+  useEffect(() => {
+    const mq = window.matchMedia(query)
+    const onChange = () => setMatches(mq.matches)
+    onChange()
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [query])
+  return matches
+}
+
+function canUseWebGL() {
+  try {
+    const canvas = document.createElement('canvas')
+    return !!(canvas.getContext('webgl2') || canvas.getContext('webgl'))
+  } catch {
+    return false
+  }
+}
+
+/** If the 3D scene throws, fall back to the flat SVG tee instead of a blank hero. */
+class SceneBoundary extends Component<{ fallback: ReactNode; children: ReactNode }, { failed: boolean }> {
+  state = { failed: false }
+
+  static getDerivedStateFromError() {
+    return { failed: true }
+  }
+
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children
+  }
+}
+
+function Hero() {
+  const reduced = useMediaQuery('(prefers-reduced-motion: reduce)')
+  const finePointer = useMediaQuery('(pointer: fine)')
+  const webgl = useMemo(canUseWebGL, [])
   const { addItem } = useCart()
 
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      setFontKey((prev) => {
-        const i = FONT_KEYS.indexOf(prev)
-        return FONT_KEYS[(i + 1) % FONT_KEYS.length]
-      })
-    }, 2400)
-    return () => clearInterval(id)
-  }, [])
+  const [fontKey, setFontKey] = useState<FontKey>(HERO.fontKey)
+  const [paused, setPaused] = useState(false)
+  const sizes = FITS[HERO.fit].sizes
+  const [size, setSize] = useState(sizes.includes('L') ? 'L' : sizes[0])
+  const rotating = !paused && !reduced
 
-  const best = useMemo(() => bestsellers(8), [])
-  const fresh = useMemo(() => newest(8), [])
+  useEffect(() => {
+    if (!rotating) return
+    const id = window.setInterval(() => {
+      setFontKey((prev) => FONT_KEYS[(FONT_KEYS.indexOf(prev) + 1) % FONT_KEYS.length])
+    }, 3500)
+    return () => window.clearInterval(id)
+  }, [rotating])
+
+  const flat = (
+    <div className="grid h-full place-items-center">
+      <Tee product={HERO} font={FONTS[fontKey]} detail="high" className="w-[78%]" />
+    </div>
+  )
+
+  return (
+    <section className="grid border-b border-line md:grid-cols-2" aria-labelledby="hero-title">
+      <div className="flex flex-col justify-center gap-6 px-[clamp(1rem,0.5rem+3vw,4rem)] py-12 md:min-h-[min(82vh,720px)] md:py-16">
+        <p className="eyebrow">Welcome to BKC · Drop 01</p>
+        <h1 id="hero-title" className="h-display">
+          From gaali <span className="block text-gold">to habit.</span>
+        </h1>
+        <p className="lede">Premium 240 GSM tees printed the way India actually talks. Soft-censored, never softened.</p>
+        <div className="flex flex-wrap items-center gap-x-7 gap-y-4 pt-1">
+          <Link to="/shop" className="btn btn-primary">
+            Shop the collection
+          </Link>
+          <Link to="/states" className="u micro text-bone">
+            Explore the slang atlas →
+          </Link>
+        </div>
+      </div>
+
+      <div className="hero-glow grid content-center gap-5 border-t border-line px-[clamp(1rem,0.5rem+3vw,3rem)] py-8 md:border-l md:border-t-0 md:py-12">
+        <div className="relative mx-auto aspect-[400/470] w-full max-w-[460px]">
+          {webgl ? (
+            <SceneBoundary fallback={flat}>
+              <Suspense fallback={flat}>
+                <Tee3D
+                  product={HERO}
+                  font={FONTS[fontKey]}
+                  animate={!reduced}
+                  interactive={finePointer}
+                  label={`${HERO.name}, oversized tee, shown in 3D with the ${FONT_NAMES[fontKey]} print face`}
+                />
+              </Suspense>
+            </SceneBoundary>
+          ) : (
+            flat
+          )}
+        </div>
+
+        <div className="grid justify-items-center gap-4">
+          {webgl && finePointer && <p className="micro">Drag to turn the tee</p>}
+          <div className="flex flex-wrap items-center justify-center gap-2" role="group" aria-label="Print face">
+            {FONT_KEYS.map((k) => (
+              <button
+                key={k}
+                type="button"
+                aria-pressed={fontKey === k}
+                className="chip-btn"
+                onClick={() => {
+                  setFontKey(k)
+                  setPaused(true)
+                }}
+              >
+                {FONT_NAMES[k]}
+              </button>
+            ))}
+            {!reduced && (
+              <button type="button" className="u micro ml-2 min-h-11 text-bone" onClick={() => setPaused((p) => !p)}>
+                {paused ? 'Resume rotation' : 'Pause rotation'}
+              </button>
+            )}
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <Link to={`/product/${HERO.id}`} className="u micro text-bone">
+              The Original
+            </Link>
+            <Price price={HERO.price} mrp={HERO.mrp} />
+            <label htmlFor="hero-size" className="sr-only">
+              Size
+            </label>
+            <select id="hero-size" className="select w-24" value={size} onChange={(e) => setSize(e.target.value)}>
+              {sizes.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() =>
+                addItem({
+                  id: HERO.id,
+                  name: HERO.name,
+                  size,
+                  color: HERO.color,
+                  fit: HERO.fit,
+                  price: HERO.price,
+                  teeHex: HERO.teeHex,
+                  printHex: HERO.printHex,
+                  printLines: HERO.printLines,
+                  glyph: HERO.glyph,
+                  font: FONTS[fontKey],
+                  backdrop: HERO.backdrop,
+                  backdropHex: HERO.backdropHex,
+                })
+              }
+            >
+              Add to bag
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+export function HomePage() {
+  const fresh = useMemo(() => newest(4), [])
+  const best = useMemo(() => bestsellers(4), [])
 
   return (
     <>
-      <section className="relative overflow-hidden border-b-2 border-ink">
-        <div
-          className="pointer-events-none absolute left-1/2 top-1/2 -z-0 -translate-x-1/2 -translate-y-1/2 select-none font-display text-[clamp(4rem,12vw,14rem)] uppercase leading-none text-transparent"
-          style={{ WebkitTextStroke: '2px rgba(14,14,12,0.12)' }}
-          aria-hidden
-        >
-          Ch**tiya
-        </div>
+      <Hero />
 
-        <div className="relative z-10 mx-auto grid max-w-[1440px] gap-6 px-[clamp(1rem,0.5rem+2vw,3rem)] py-8 md:grid-cols-[1fr_minmax(260px,42%)_1fr] md:items-center md:py-12 lg:min-h-[min(84vh,780px)]">
-          <div className="order-1 flex flex-col gap-4 md:order-none">
-            <span className="w-fit border-2 border-ink bg-marigold px-3 py-1.5 font-mono text-[0.7rem] uppercase tracking-[0.2em]">
-              Drop 01 · Live now
-            </span>
-            <h1 className="font-display text-[clamp(2.2rem,1rem+4vw,4.4rem)] uppercase leading-[1.04]">
-              The tee
-              <br />
-              that says
-              <br />
-              <span className="inline-block bg-marigold px-2 py-1 leading-none">it out loud</span>
-            </h1>
-            <p className="max-w-[32ch] text-sm text-ink-70 sm:text-base">
-              One white 240 GSM canvas. Soft-censor brand name: {BRAND.softWord}. Hinglish lockup{' '}
-              <span className="font-deva text-chilli">{BRAND.hinglishLockup}</span>. Tap a font — the shirt
-              changes live.
-            </p>
+      <section className="shell pt-10 md:pt-14" aria-label="Shop by category">
+        <div className="grid grid-cols-2 border-l border-t border-line lg:grid-cols-4">
+          {TILES.map((t) => (
             <Link
-              to="/shop"
-              className="inline-flex min-h-12 w-fit items-center border-2 border-ink bg-ink px-5 font-bold uppercase text-cream hard-shadow"
+              key={t.label}
+              to={t.to}
+              className="group grid items-center justify-items-center gap-3 border-b border-r border-line p-3 text-center transition-colors duration-500 hover:bg-surface sm:grid-cols-[92px_1fr] sm:justify-items-start sm:p-4 sm:text-left"
             >
-              Shop the full catalogue →
-            </Link>
-          </div>
-
-          <div className="order-2 flex flex-col items-center md:order-none">
-            <div className="tee-float w-full max-w-[420px]">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={fontKey}
-                  initial={{ opacity: 0.4, scale: 0.98 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0.4 }}
-                  transition={{ duration: 0.25 }}
-                >
-                  <Tee
-                    product={hero}
-                    font={FONTS[fontKey]}
-                    detail="high"
-                    className="w-full"
-                  />
-                </motion.div>
-              </AnimatePresence>
-            </div>
-            <div className="mt-4 flex flex-wrap justify-center gap-2" role="group" aria-label="Choose print typeface">
-              {FONT_KEYS.map((k) => (
-                <button
-                  key={k}
-                  type="button"
-                  onClick={() => setFontKey(k)}
-                  className={`min-h-11 min-w-11 border-2 border-ink px-2 text-xs uppercase ${
-                    fontKey === k ? 'bg-chilli text-cream' : 'bg-cream'
-                  }`}
-                >
-                  {k.slice(0, 3)}
-                </button>
-              ))}
-            </div>
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-              <span className="font-mono text-lg">
-                {money(hero.price)} <s className="text-ink-45">{money(hero.mrp)}</s>
-              </span>
-              <button
-                type="button"
-                className="min-h-12 border-2 border-ink bg-marigold px-5 font-bold uppercase hard-shadow-sm"
-                onClick={() =>
-                  addItem({
-                    id: hero.id,
-                    name: hero.name,
-                    size: 'L',
-                    color: hero.color,
-                    fit: hero.fit,
-                    price: hero.price,
-                    teeHex: hero.teeHex,
-                    printHex: hero.printHex,
-                    printLines: hero.printLines,
-                    glyph: hero.glyph,
-                    font: FONTS[fontKey],
-                    backdrop: hero.backdrop,
-                    backdropHex: hero.backdropHex,
-                  })
-                }
-              >
-                Add this one to bag
-              </button>
-            </div>
-            <p className="mt-2 text-center font-mono text-xs text-ink-45">
-              Oversized · Drop shoulder · Chalk white · S–3XL
-            </p>
-          </div>
-
-          <div className="order-3 grid grid-cols-2 gap-3 md:order-none md:grid-cols-1 md:justify-items-end md:text-right">
-            {[
-              [String(PRODUCTS.length), 'Designs live'],
-              ['23', 'Occasion drops'],
-              ['20', 'Garment colours'],
-              ['4', 'Fits, incl. kids'],
-            ].map(([n, l]) => (
-              <div key={l} className="border-2 border-ink bg-cream px-3 py-2 md:w-40">
-                <b className="font-display text-2xl">{n}</b>
-                <span className="block text-xs text-ink-45">{l}</span>
+              <div className="spot w-24 p-1.5 sm:w-auto">
+                <Tee product={t.product} detail="card" />
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <Marquee />
-
-      <section className="mx-auto max-w-[1440px] px-[clamp(1rem,0.5rem+2vw,3rem)] py-12 md:py-16">
-        <SectionHead
-          eyebrow="01 — Different taste, different tee"
-          title={<>Pick your<br />flavour</>}
-          note="Sixteen taste categories, from group-chat humour to pure typography."
-        />
-        <div className="flex gap-3 overflow-x-auto pb-3 snap-x">
-          {CATEGORIES.map((c) => (
-            <Link
-              key={c.key}
-              to={`/shop?cat=${c.key}`}
-              className="min-w-[148px] snap-start border-2 border-ink bg-cream p-4 hover:bg-marigold"
-            >
-              <span className="text-2xl" aria-hidden>
-                {c.glyph}
-              </span>
-              <h3 className="mt-2 font-display text-lg uppercase">{c.label}</h3>
-              <p className="mt-1 text-xs text-ink-45">{c.note}</p>
+              <div className="grid gap-1.5">
+                <h2 className="h-label transition-colors group-hover:text-gold">{t.label}</h2>
+                <span className="micro text-gold">Explore</span>
+              </div>
             </Link>
           ))}
         </div>
       </section>
 
-      <section className="border-y-2 border-ink bg-paper-2 py-12 md:py-16">
-        <div className="mx-auto max-w-[1440px] px-[clamp(1rem,0.5rem+2vw,3rem)]">
-          <SectionHead
-            eyebrow="02 — The gap nobody else fills"
-            title={
-              <>
-                Shop by where
-                <br />
-                you speak
-              </>
-            }
-            note={BRAND.differentiator}
-          />
-          <div className="mb-4 max-w-2xl text-sm text-ink-70">
-            From Kumaoni <i>चाल जालुं</i> to Malayalam <i>എടാ</i> — day-to-day slang by state and region, one storefront.
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-3 snap-x">
-            {STATES.slice(0, 10).map((s) => (
-              <Link
-                key={s.key}
-                to={`/shop?state=${s.key}`}
-                className="min-w-[140px] snap-start border-2 border-ink bg-cream p-4 hover:bg-marigold"
-              >
-                <span className="text-2xl">{s.glyph}</span>
-                <h3 className="mt-2 font-display text-lg uppercase">{s.label}</h3>
-                <p className="text-xs text-ink-45">{s.regions.map((r) => r.lang).join(' · ')}</p>
-              </Link>
-            ))}
-          </div>
-          <Link to="/states" className="mt-4 inline-flex min-h-11 font-bold uppercase underline">
-            Full India atlas →
-          </Link>
+      <div className="shell py-12">
+        <Ornament />
+      </div>
+
+      <section className="shell" aria-labelledby="new-title">
+        <RowHead title="New arrivals" id="new-title" to="/shop" />
+        <div className="grid grid-cols-2 gap-x-4 gap-y-8 lg:grid-cols-4">
+          {fresh.map((p, i) => (
+            <ProductCard key={p.id} product={p} index={i} />
+          ))}
         </div>
       </section>
 
-      <section className="border-y-2 border-ink bg-paper-2 py-12 md:py-16">
-        <div className="mx-auto max-w-[1440px] px-[clamp(1rem,0.5rem+2vw,3rem)]">
-          <SectionHead
-            eyebrow="03 — Tshirt of everyone"
-            title={
-              <>
-                Everyone
-                <br />
-                gets one
-              </>
-            }
-          />
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-            {[
-              { href: '/shop?aud=men', g: '🧔', t: 'Men', d: 'Oversized + classic' },
-              { href: '/shop?aud=women', g: '👩', t: 'Women', d: 'Crop, oversized, regular' },
-              { href: '/shop?cat=pride', g: '🏳️‍🌈', t: 'Pride', d: 'Stocked all year' },
-              { href: '/shop?fit=kids', g: '🧒', t: 'Kids', d: 'Skin-safe inks' },
-              { href: '/shop?cat=animals', g: '🐄', t: 'Animals', d: 'Cows, strays, insects' },
-            ].map((a) => (
-              <Link key={a.t} to={a.href} className="border-2 border-ink bg-cream p-5 hover:bg-marigold">
-                <span className="text-3xl">{a.g}</span>
-                <h3 className="mt-2 font-display text-xl uppercase">{a.t}</h3>
-                <p className="text-sm text-ink-45">{a.d}</p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-[1440px] px-[clamp(1rem,0.5rem+2vw,3rem)] py-12 md:py-16">
-        <SectionHead eyebrow="04 — Bestsellers" title="Loudest in the room" />
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 md:gap-4">
+      <section className="shell pt-14 md:pt-20" aria-labelledby="best-title">
+        <RowHead title="Best sellers" id="best-title" to="/shop?sort=reviews" />
+        <div className="grid grid-cols-2 gap-x-4 gap-y-8 lg:grid-cols-4">
           {best.map((p, i) => (
             <ProductCard key={p.id} product={p} index={i} />
           ))}
         </div>
       </section>
 
-      <section className="border-t-2 border-ink bg-indigo py-12 text-cream md:py-16">
-        <div className="mx-auto max-w-[1440px] px-[clamp(1rem,0.5rem+2vw,3rem)]">
-          <SectionHead
-            eyebrow="05 — Civic"
-            title={<span className="text-cream">Vote. Ask. Show up.</span>}
-            note="Non-partisan turnout and peaceful-assembly prints. No party names, colours or symbols — ever."
-          />
-          <Link
-            to="/shop?cat=civic"
-            className="inline-flex min-h-12 items-center border-2 border-cream bg-marigold px-5 font-bold uppercase text-ink"
-          >
-            Shop civic tees →
+      <section className="shell mt-16 grid gap-12 border-t border-line py-16 md:mt-24 md:grid-cols-[1fr_1.1fr] md:py-24" aria-labelledby="atlas-title">
+        <div className="grid content-start gap-5">
+          <p className="eyebrow">The India slang atlas</p>
+          <h2 id="atlas-title" className="h-section">
+            Shop by where
+            <br />
+            you speak
+          </h2>
+          <p className="lede">
+            {REGIONAL_COUNT} regional designs across {STATES.length} states and {REGION_COUNT} regional tongues. One atlas. One
+            cart.
+          </p>
+          <div>
+            <Link to="/states" className="btn btn-secondary">
+              Open the atlas
+            </Link>
+          </div>
+        </div>
+        <ul className="atlas-list">
+          {STATES.slice(0, 8).map((s) => (
+            <li key={s.key}>
+              <Link to={`/shop?state=${s.key}`}>
+                <b>{s.label}</b>
+                <small>{[...new Set(s.regions.map((r) => r.lang))].join(' · ')}</small>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="shell pb-16 md:pb-24" aria-labelledby="everyone-title">
+        <SectionHead eyebrow="For everyone" title="Everyone gets one" id="everyone-title" />
+        <div className="grid grid-cols-2 border-l border-t border-line lg:grid-cols-5">
+          {AUDIENCES.map((a) => (
+            <Link key={a.title} to={a.to} className="group grid content-start gap-1.5 border-b border-r border-line p-5 transition-colors duration-500 hover:bg-surface">
+              <span className="font-display text-2xl font-semibold uppercase tracking-[0.06em] transition-colors group-hover:text-gold">{a.title}</span>
+              <span className="text-sm text-muted">{a.note}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="border-y border-line bg-surface" aria-labelledby="civic-title">
+        <div className="shell grid gap-6 py-14 md:grid-cols-[1fr_auto] md:items-end">
+          <div className="grid gap-4">
+            <p className="eyebrow">Civic</p>
+            <h2 id="civic-title" className="h-section">
+              Vote. Ask. Show up.
+            </h2>
+            <p className="lede">Non-partisan turnout and peaceful-assembly prints. No party names, colours or symbols. Ever.</p>
+          </div>
+          <Link to="/shop?cat=civic" className="btn btn-secondary justify-self-start">
+            Shop civic tees
           </Link>
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1440px] px-[clamp(1rem,0.5rem+2vw,3rem)] py-12 md:py-16">
-        <SectionHead eyebrow="06 — New drops" title="Just landed" />
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-          {fresh.map((p, i) => (
-            <ProductCard key={p.id} product={p} index={i} />
-          ))}
-        </div>
+      <section className="shell py-14 md:py-20" aria-label="Why BKC">
+        <TrustBar />
       </section>
     </>
   )

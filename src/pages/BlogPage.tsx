@@ -4,21 +4,23 @@ import { SectionHead } from '../components/ProductCard'
 
 export function BlogPage() {
   return (
-    <div className="mx-auto max-w-[1440px] px-[clamp(1rem,0.5rem+2vw,3rem)] py-8 md:py-12">
-      <SectionHead eyebrow="The Journal" title="Read before you print" />
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="shell py-10 md:py-14">
+      <SectionHead level={1} eyebrow="The Journal" title="Read before you print" note="Fit guides, the slang atlas, and why a gaali became a brand." />
+      <div className="grid border-l border-t border-line md:grid-cols-2 lg:grid-cols-3">
         {POSTS.map((p) => (
-          <Link key={p.slug} to={`/blog/${p.slug}`} className="flex flex-col border-2 border-ink bg-cream">
-            <div className="flex h-36 items-center justify-center text-5xl" style={{ background: p.bg }}>
-              {p.glyph}
-            </div>
-            <div className="flex flex-1 flex-col gap-2 border-t-2 border-ink p-4">
-              <span className="font-mono text-[10px] uppercase tracking-wider text-ink-45">
-                {p.cat} · {p.read} min · {p.date}
-              </span>
-              <h2 className="font-display text-xl uppercase leading-tight">{p.title}</h2>
-              <p className="text-sm text-ink-70">{p.dek}</p>
-            </div>
+          <Link
+            key={p.slug}
+            to={`/blog/${p.slug}`}
+            className="group grid content-start gap-3 border-b border-r border-line p-6 transition-colors duration-500 hover:bg-surface md:p-8"
+          >
+            <p className="micro">
+              {p.cat} · {p.read} min · {p.date}
+            </p>
+            <h2 className="font-display text-[1.75rem] font-semibold uppercase leading-[1.08] tracking-[0.03em] transition-colors group-hover:text-gold">
+              {p.title}
+            </h2>
+            <p className="text-sm text-muted">{p.dek}</p>
+            <span className="micro mt-2 text-gold">Read →</span>
           </Link>
         ))}
       </div>
@@ -29,29 +31,32 @@ export function BlogPage() {
 export function PostPage() {
   const { slug } = useParams()
   const post = postBySlug(slug || '')
+
   if (!post) {
     return (
-      <div className="px-4 py-20 text-center">
-        <p>Post not found.</p>
-        <Link to="/blog" className="underline">
-          Journal
+      <div className="shell grid justify-items-center gap-5 py-24 text-center">
+        <h1 className="h-section">Post not found</h1>
+        <Link to="/blog" className="btn btn-secondary">
+          Back to the Journal
         </Link>
       </div>
     )
   }
+
   return (
-    <article className="mx-auto max-w-3xl px-[clamp(1rem,0.5rem+2vw,3rem)] py-8 md:py-12">
-      <Link to="/blog" className="text-sm underline">
+    <article className="mx-auto max-w-3xl px-[clamp(1rem,0.5rem+2.5vw,3rem)] py-10 md:py-14">
+      <Link to="/blog" className="u micro text-bone">
         ← Journal
       </Link>
-      <p className="mt-4 font-mono text-xs uppercase tracking-wider text-ink-45">
+      <p className="eyebrow mt-8">
         {post.cat} · {post.read} min read · {post.date}
       </p>
-      <h1 className="mt-2 font-display text-[clamp(2rem,1rem+3vw,3.5rem)] uppercase leading-none">
+      <h1 className="mt-4 font-display text-[clamp(2.2rem,1.2rem+3vw,3.75rem)] font-medium uppercase leading-[1.02] tracking-[0.02em]">
         {post.title}
       </h1>
-      <p className="mt-3 text-lg text-ink-70">{post.dek}</p>
-      <div className="prose-bkc mt-8" dangerouslySetInnerHTML={{ __html: post.body }} />
+      <p className="lede mt-5 max-w-none text-lg">{post.dek}</p>
+      <div className="my-10 h-px bg-line" />
+      <div className="prose-bkc" dangerouslySetInnerHTML={{ __html: post.body }} />
     </article>
   )
 }

@@ -24,7 +24,7 @@ Open the URL Vite prints (`http://127.0.0.1:5174/Bkc/`).
 
 ## What’s inside
 
-- **138 designs** · 20 colours · 4 fits (oversized / regular / crop / kids)
+- **186 designs** · 20 colours · 4 fits (oversized / regular / crop / kids)
 - Audiences: men, women, unisex, kids, pride
 - Occasions across the Indian calendar including **voting** and **peaceful protest** (non-partisan)
 - Shop filters in the URL · mobile filter sheet · sticky PDP ATC · cart in `localStorage`

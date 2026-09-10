@@ -1,44 +1,52 @@
 import { Link } from 'react-router-dom'
-import { COLLECTIONS, CATEGORIES, filterProducts } from '../data/catalog'
+import { CATEGORIES, COLLECTIONS, filterProducts } from '../data/catalog'
 import { SectionHead } from '../components/ProductCard'
+import { Tee } from '../components/Tee'
 
 export function CollectionsPage() {
   return (
-    <div className="mx-auto max-w-[1440px] px-[clamp(1rem,0.5rem+2vw,3rem)] py-8 md:py-12">
-      <SectionHead
-        eyebrow="Curated capsules"
-        title="Collections"
-        note="Ten ways into the catalogue — plus every taste category."
-      />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="shell py-10 md:py-14">
+      <SectionHead level={1} eyebrow="Curated capsules" title="Collections" note="Ten ways into the catalogue, plus every taste category." />
+
+      <div className="grid gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
         {COLLECTIONS.map((c) => {
           const qs = new URLSearchParams(c.filter as Record<string, string>).toString()
-          const count = filterProducts(c.filter).length
+          const items = filterProducts(c.filter)
+          const lead = items[0]
           return (
-            <Link
-              key={c.key}
-              to={`/shop?${qs}`}
-              className="border-2 border-ink p-5"
-              style={{ background: c.hero }}
-            >
-              <span className="text-3xl">{c.glyph}</span>
-              <h2 className="mt-2 font-display text-2xl uppercase">{c.label}</h2>
-              <p className="mt-1 text-sm text-ink/80">{c.note}</p>
-              <p className="mt-3 font-mono text-xs">{count} tees →</p>
+            <Link key={c.key} to={`/shop?${qs}`} className="group grid content-start gap-4">
+              <div className="spot grid aspect-[4/3] place-items-center overflow-hidden p-6">
+                {lead && (
+                  <Tee product={lead} detail="card" className="w-[58%] transition-transform duration-700 ease-lux group-hover:scale-[1.03]" />
+                )}
+              </div>
+              <div className="grid gap-1.5">
+                <h2 className="font-display text-2xl font-semibold uppercase tracking-[0.05em] transition-colors group-hover:text-gold">
+                  {c.label}
+                </h2>
+                <p className="text-sm text-muted">{c.note}</p>
+                <p className="micro mt-1 text-gold">{items.length} tees →</p>
+              </div>
             </Link>
           )
         })}
       </div>
 
-      <h2 className="mb-4 mt-14 font-display text-2xl uppercase">All categories</h2>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        {CATEGORIES.map((c) => (
-          <Link key={c.key} to={`/shop?cat=${c.key}`} className="border-2 border-ink bg-cream p-4 hover:bg-marigold">
-            <span>{c.glyph}</span>
-            <h3 className="font-display uppercase">{c.label}</h3>
-          </Link>
-        ))}
-      </div>
+      <section className="mt-20" aria-labelledby="categories-title">
+        <SectionHead eyebrow="By taste" title="All categories" id="categories-title" />
+        <div className="grid grid-cols-2 border-l border-t border-line md:grid-cols-3 lg:grid-cols-4">
+          {CATEGORIES.map((c) => (
+            <Link
+              key={c.key}
+              to={`/shop?cat=${c.key}`}
+              className="group grid content-start gap-1.5 border-b border-r border-line p-5 transition-colors duration-500 hover:bg-surface"
+            >
+              <h3 className="h-label transition-colors group-hover:text-gold">{c.label}</h3>
+              <p className="text-sm text-muted">{c.note}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
     </div>
   )
 }

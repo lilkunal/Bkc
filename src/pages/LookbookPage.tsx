@@ -20,12 +20,8 @@ const LOOKS: Look[] = [
 ]
 
 function resolve(look: Look): Product {
-  if (look.id) {
-    return PRODUCTS.find((p) => p.id === look.id) || PRODUCTS[0]
-  }
-  if (look.slugMatch) {
-    return PRODUCTS.find((p) => p.slug.includes(look.slugMatch!)) || PRODUCTS[0]
-  }
+  if (look.id) return PRODUCTS.find((p) => p.id === look.id) || PRODUCTS[0]
+  if (look.slugMatch) return PRODUCTS.find((p) => p.slug.includes(look.slugMatch!)) || PRODUCTS[0]
   return PRODUCTS[0]
 }
 
@@ -33,8 +29,9 @@ export function LookbookPage() {
   const shots = LOOKS.map((look) => ({ ...look, product: resolve(look) }))
 
   return (
-    <div className="mx-auto max-w-[1440px] px-[clamp(1rem,0.5rem+2vw,3rem)] py-8 md:py-12">
+    <div className="shell py-10 md:py-14">
       <SectionHead
+        level={1}
         eyebrow="Lookbook"
         title={
           <>
@@ -43,42 +40,47 @@ export function LookbookPage() {
             clip-art
           </>
         }
-        note="Phase 1 uses the procedural garment engine as the product shot. Face-based photographic mockups slot into this grid as assets land."
+        note="The first photographic still, plus studio renders of the drop's loudest prints."
       />
 
-      <div className="mb-8 border-2 border-ink bg-paper-2 p-4 text-sm text-ink-70 md:p-5">
-        Model direction: South Asian, thick mustache, wavy black hair — identity reference used for the hero lookbook
-        still. Friend face pending for a second model slot.
-      </div>
-
-      <figure className="mb-8 overflow-hidden border-2 border-ink bg-cream">
-        <img
-          src={`${import.meta.env.BASE_URL}lookbook/hero-kunal.png`}
-          alt="Model wearing Bharat Ka Ch**tiya oversized white tee"
-          width={900}
-          height={1200}
-          className="mx-auto max-h-[70vh] w-full object-cover object-top"
-          loading="eager"
-        />
-        <figcaption className="border-t-2 border-ink p-4">
-          <h3 className="font-display text-xl uppercase">Hero drop — photographic</h3>
-          <p className="text-sm text-ink-70">Generated lookbook still from the founder face reference · white oversized</p>
-          <Link to="/product/BKC-1001" className="mt-2 inline-block text-sm underline">
-            Shop this tee →
+      <figure className="mb-14 grid overflow-hidden border border-line bg-surface md:grid-cols-[1.1fr_1fr]">
+        <div className="relative h-[520px] md:h-[640px]">
+          <img
+            src={`${import.meta.env.BASE_URL}lookbook/hero-kunal.webp`}
+            width={1024}
+            height={1536}
+            alt="Model wearing the white oversized Bharat Ka Ch**tiya tee"
+            className="absolute inset-0 h-full w-full object-cover object-[50%_42%]"
+            fetchPriority="high"
+          />
+        </div>
+        <figcaption className="grid content-center justify-items-start gap-4 p-8 md:p-12">
+          <p className="eyebrow">Hero drop · photographic</p>
+          <h2 className="h-section">The Original, worn</h2>
+          <p className="lede">
+            White oversized, 240 GSM. A generated still made from the founder’s face reference. More photography lands here
+            as the drop grows.
+          </p>
+          <Link to="/product/BKC-1001" className="btn btn-secondary">
+            Shop this tee
           </Link>
         </figcaption>
       </figure>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
         {shots.map((s) => (
-          <figure key={s.label} className="border-2 border-ink bg-cream">
-            <div className="bg-gradient-to-b from-paper-3 to-paper-2 p-6">
-              <Tee product={s.product} detail="high" className="mx-auto max-w-[280px]" />
-            </div>
-            <figcaption className="border-t-2 border-ink p-4">
-              <h3 className="font-display text-lg uppercase">{s.label}</h3>
-              <p className="text-sm text-ink-70">{s.note}</p>
-              <Link to={`/product/${s.product.id}`} className="mt-2 inline-block text-sm underline">
+          <figure key={s.label} className="group m-0 grid content-start gap-4">
+            <Link to={`/product/${s.product.id}`} tabIndex={-1} aria-hidden="true" className="spot block overflow-hidden p-8">
+              <Tee
+                product={s.product}
+                detail="high"
+                className="mx-auto max-w-[280px] transition-transform duration-700 ease-lux group-hover:scale-[1.03]"
+              />
+            </Link>
+            <figcaption className="grid gap-1.5">
+              <h2 className="font-display text-2xl font-semibold uppercase tracking-[0.05em]">{s.label}</h2>
+              <p className="text-sm text-muted">{s.note}</p>
+              <Link to={`/product/${s.product.id}`} className="u micro mt-1 justify-self-start text-gold">
                 View product →
               </Link>
             </figcaption>
