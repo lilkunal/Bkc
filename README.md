@@ -11,7 +11,7 @@ npm install
 npm run dev
 ```
 
-Open the URL Vite prints (usually `http://localhost:5173/Bkc/`).
+Open the URL Vite prints (`http://127.0.0.1:5174/Bkc/`).
 
 ## Scripts
 

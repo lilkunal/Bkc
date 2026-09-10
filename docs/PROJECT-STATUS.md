@@ -19,6 +19,6 @@
 
 ```bash
 npm run dev
-# http://localhost:5173/Bkc/states
-# http://localhost:5173/Bkc/shop?state=uttarakhand&region=kumaon
+# http://127.0.0.1:5174/Bkc/states
+# http://127.0.0.1:5174/Bkc/shop?state=uttarakhand&region=kumaon
 ```
