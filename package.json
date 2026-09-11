@@ -9,7 +9,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "predeploy": "npm run build && node -e \"require('fs').copyFileSync('dist/index.html','dist/404.html')\"",
+    "predeploy": "npm run build && node scripts/prerender-routes.mjs",
     "deploy": "gh-pages -d dist",
     "test:shop": "playwright test"
   },

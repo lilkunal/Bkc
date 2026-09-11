@@ -46,7 +46,7 @@ export function LookbookPage() {
       <figure className="mb-14 grid overflow-hidden border border-line bg-surface md:grid-cols-[1.1fr_1fr]">
         <div className="relative h-[520px] md:h-[640px]">
           <img
-            src={`${import.meta.env.BASE_URL}lookbook/hero-kunal.webp`}
+            src={`${import.meta.env.BASE_URL}media/hero-kunal.webp`}
             width={1024}
             height={1536}
             alt="Model wearing the white oversized Bharat Ka Ch**tiya tee"

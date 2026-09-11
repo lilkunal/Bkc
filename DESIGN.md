@@ -106,7 +106,7 @@ Rules: never set small text in `faint` or `line`. Placeholders use `muted`.
 
 ## Imagery
 - **Home hero:** a real-time 3D tee (`src/components/Tee3D.tsx`, three.js via @react-three/fiber). The silhouette is extruded from the same SVG path the shop renders use (`teeShape()` in `src/lib/tee.ts`), and the print is painted live in the selected print face. Lazy-loaded: the flat SVG tee shows while it loads, when WebGL is unavailable, or if the scene errors. Drag-to-turn only on fine pointers, so touch scrolling is never hijacked. Motion stops for reduced-motion users.
-- **Lookbook photo:** `public/lookbook/hero-kunal.webp` (1024×1536), crop anchor 42%. The model photo is not used in the home hero.
+- **Lookbook photo:** `public/media/hero-kunal.webp` (1024×1536), crop anchor 42%. The model photo is not used in the home hero.
 - Product imagery: `src/lib/tee.ts` procedural SVG garments.
 
 ## Decisions Log
