@@ -1,0 +1,1 @@
+var e=()=>Math.min(window.devicePixelRatio||1,1.75);export{e as t};
