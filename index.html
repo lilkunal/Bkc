@@ -5,6 +5,17 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#0B0A08" />
+    <script>
+      // Paint a visitor's saved theme before the app loads (written by applyTheme in src/themes.ts).
+      try {
+        var vars = JSON.parse(localStorage.getItem('bkc_theme_vars') || 'null')
+        if (vars) {
+          var root = document.documentElement
+          for (var k in vars) root.style.setProperty(k, vars[k])
+          root.dataset.theme = localStorage.getItem('bkc_theme') || ''
+        }
+      } catch (e) {}
+    </script>
     <meta name="description" content="BKC — Bharat Ka Ch**tiya. Premium printed tees in the way India actually talks. Shop by state, region and day-to-day slang." />
     <title>BKC — Bharat Ka चूtiya</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />

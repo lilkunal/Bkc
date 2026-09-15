@@ -12,6 +12,10 @@ export type CartItem = {
   key: string
   id: string
   name: string
+  /** Garment type from the product sheet (tee, shirt…). */
+  type?: string
+  /** Product photo, when the sheet has one. */
+  image?: string
   size: string
   color: string
   fit: string
@@ -33,13 +37,17 @@ type CartContextValue = {
   total: number
   open: boolean
   setOpen: (v: boolean) => void
-  addItem: (item: Omit<CartItem, 'key' | 'qty' | 'addedAt'> & { qty?: number }) => void
+  addItem: (item: Omit<CartItem, 'key' | 'qty' | 'addedAt'> & { qty?: number }, options?: { openBag?: boolean }) => void
   removeItem: (key: string) => void
   setQty: (key: string, qty: number) => void
   clear: () => void
+  /** Coupon code entered in the bag or at checkout. */
+  coupon: string | null
+  setCoupon: (code: string | null) => void
 }
 
 const STORAGE_KEY = 'bkc_cart_v1'
+const COUPON_KEY = 'bkc_coupon'
 const CartContext = createContext<CartContextValue | null>(null)
 
 function load(): CartItem[] {
@@ -53,18 +61,40 @@ function load(): CartItem[] {
   }
 }
 
+function loadCoupon(): string | null {
+  try {
+    return localStorage.getItem(COUPON_KEY)
+  } catch {
+    return null
+  }
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>(() =>
     typeof window === 'undefined' ? [] : load(),
   )
+  const [coupon, setCoupon] = useState<string | null>(() => (typeof window === 'undefined' ? null : loadCoupon()))
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
+    } catch {
+      // Storage blocked: the bag still works for this visit.
+    }
   }, [items])
 
+  useEffect(() => {
+    try {
+      if (coupon) localStorage.setItem(COUPON_KEY, coupon)
+      else localStorage.removeItem(COUPON_KEY)
+    } catch {
+      // Storage blocked.
+    }
+  }, [coupon])
+
   const addItem = useCallback(
-    (item: Omit<CartItem, 'key' | 'qty' | 'addedAt'> & { qty?: number }) => {
+    (item: Omit<CartItem, 'key' | 'qty' | 'addedAt'> & { qty?: number }, options: { openBag?: boolean } = {}) => {
       const key = `${item.id}|${item.size}|${item.color}|${item.fit}`
       setItems((prev) => {
         const existing = prev.find((p) => p.key === key)
@@ -83,7 +113,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           },
         ]
       })
-      setOpen(true)
+      if (options.openBag !== false) setOpen(true)
     },
     [],
   )
@@ -113,8 +143,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeItem,
       setQty,
       clear,
+      coupon,
+      setCoupon,
     }),
-    [items, open, addItem, removeItem, setQty, clear],
+    [items, open, addItem, removeItem, setQty, clear, coupon],
   )
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>

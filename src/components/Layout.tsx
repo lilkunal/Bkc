@@ -2,12 +2,21 @@ import type { FormEvent, ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
-import { COLORS } from '../data/catalog'
+import { useWishlist } from '../context/WishlistContext'
+import { CATEGORIES, COLORS, GARMENTS, PRODUCT_TYPES, featuredProduct, priceBands } from '../data/catalog'
 import { BRAND } from '../data/states'
+import { STORE } from '../store.config'
 import { money } from '../lib/format'
+import { computeTotals } from '../lib/pricing'
+import { BackToTop } from './BackToTop'
 import { Wordmark } from './Brand'
-import { IconBag, IconClose, IconMenu, IconSearch } from './Icons'
-import { Tee } from './Tee'
+import { FreeShippingBar } from './CommerceBits'
+import { IconBag, IconChevron, IconClose, IconHeart, IconMenu, IconSearch, IconUser } from './Icons'
+import { GarmentImage } from './GarmentImage'
+import { AnimatedNumber, ScrollProgress, SlidingNumber } from './motion'
+import { Price } from './Price'
+import { SearchDialog } from './SearchDialog'
+import { ThemeOptionsInline, ThemePicker } from './ThemePicker'
 
 const NAV_LEFT = [
   { to: '/shop', label: 'Shop' },
@@ -25,19 +34,23 @@ const NAV_ALL = [
   { to: '/occasions', label: 'Occasions' },
   { to: '/lookbook', label: 'Lookbook' },
   ...NAV_RIGHT,
-  { to: '/market', label: 'Market file' },
-  { to: '/case-study', label: 'Case study' },
+  { to: '/wishlist', label: 'Wishlist' },
+  { to: '/account', label: 'Your account' },
+  { to: '/track', label: 'Track an order' },
+  ...(STORE.features.marketFile ? [{ to: '/market', label: 'Market file' }] : []),
+  ...(STORE.features.caseStudy ? [{ to: '/case-study', label: 'Case study' }] : []),
 ]
 
 const FOOTER_COLUMNS: { title: string; links: [to: string, label: string][] }[] = [
   {
     title: 'Shop',
     links: [
-      ['/shop', 'All tees'],
+      ['/shop', 'Shop everything'],
       ['/states', 'States & slang'],
       ['/collections', 'Collections'],
       ['/occasions', 'Occasions'],
       ['/lookbook', 'Lookbook'],
+      ['/wishlist', 'Wishlist'],
     ],
   },
   {
@@ -45,21 +58,154 @@ const FOOTER_COLUMNS: { title: string; links: [to: string, label: string][] }[] 
     links: [
       ['/about', 'About'],
       ['/blog', 'Journal'],
-      ['/market', 'Market file'],
-      ['/case-study', 'Case study'],
+      ...(STORE.features.marketFile ? [['/market', 'Market file'] as [string, string]] : []),
+      ...(STORE.features.caseStudy ? [['/case-study', 'Case study'] as [string, string]] : []),
     ],
   },
   {
     title: 'Help',
     links: [
-      ['/about#fits', 'Fits & GSM'],
+      ['/track', 'Track an order'],
+      ['/account', 'Your account'],
+      ['/policies/shipping', 'Shipping'],
+      ['/policies/returns', 'Returns & exchanges'],
+      ['/about#fits', 'Fits & fabrics'],
       ['/about#contact', 'Contact'],
-      ['/occasions#policy', 'Content policy'],
     ],
   },
 ]
 
 const desktopNavClass = 'u hidden py-3 text-xs font-medium uppercase tracking-[0.2em] lg:inline-block'
+
+const FEATURED = featuredProduct()
+const PRICE_BANDS = priceBands()
+
+const SHOP_COLUMNS: { title: string; links: [to: string, label: string][] }[] = [
+  {
+    title: 'Garments',
+    links: [...PRODUCT_TYPES.map((t): [string, string] => [`/shop?type=${t}`, GARMENTS[t].plural]), ['/shop', 'Shop everything']],
+  },
+  {
+    title: 'Shop by',
+    links: [
+      ['/shop?sort=newest', 'New arrivals'],
+      ['/shop?sort=reviews', 'Best sellers'],
+      ['/shop?sort=rating', 'Top rated'],
+      ['/collections', 'Collections'],
+      ['/wishlist', 'Your wishlist'],
+    ],
+  },
+  ...(PRICE_BANDS.length
+    ? [{ title: 'Price', links: PRICE_BANDS.map((b): [string, string] => [`/shop?under=${b.under}`, `Under ${money(b.under)}`]) }]
+    : []),
+  { title: 'Categories', links: CATEGORIES.slice(0, 7).map((c): [string, string] => [`/shop?cat=${c.key}`, c.label]) },
+]
+
+/** Desktop "Shop" link with a mega menu. Opens on hover or with the chevron button; Escape or leaving closes it. */
+function ShopMenu() {
+  const [open, setOpen] = useState(false)
+  const wrap = useRef<HTMLDivElement>(null)
+  const toggle = useRef<HTMLButtonElement>(null)
+  const timer = useRef(0)
+  const { pathname, search } = useLocation()
+
+  useEffect(() => {
+    setOpen(false)
+  }, [pathname, search])
+
+  useEffect(() => () => window.clearTimeout(timer.current), [])
+
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setOpen(false)
+        toggle.current?.focus()
+      }
+    }
+    const onDown = (e: PointerEvent) => {
+      if (!wrap.current?.contains(e.target as Node)) setOpen(false)
+    }
+    const onScroll = () => setOpen(false)
+    document.addEventListener('keydown', onKey)
+    document.addEventListener('pointerdown', onDown)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.removeEventListener('pointerdown', onDown)
+      window.removeEventListener('scroll', onScroll)
+    }
+  }, [open])
+
+  const later = (next: boolean, ms: number) => {
+    window.clearTimeout(timer.current)
+    timer.current = window.setTimeout(() => setOpen(next), ms)
+  }
+
+  return (
+    <div
+      ref={wrap}
+      className="hidden items-center gap-0.5 lg:flex"
+      onPointerEnter={(e) => {
+        if (e.pointerType === 'mouse') later(true, 120)
+      }}
+      onPointerLeave={(e) => {
+        if (e.pointerType === 'mouse') later(false, 220)
+      }}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOpen(false)
+      }}
+    >
+      <NavLink to="/shop" className="u py-3 text-xs font-medium uppercase tracking-[0.2em]">
+        Shop
+      </NavLink>
+      <button
+        ref={toggle}
+        type="button"
+        className="grid h-10 w-7 place-items-center text-muted transition-colors hover:text-gold"
+        aria-expanded={open}
+        aria-controls="shop-menu"
+        aria-label="Shop menu"
+        onClick={() => {
+          window.clearTimeout(timer.current)
+          setOpen((v) => !v)
+        }}
+      >
+        <IconChevron dir="down" className={`h-3.5 w-3.5 transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
+      </button>
+      <div id="shop-menu" hidden={!open} className="mega-menu">
+        <div className="shell grid grid-cols-[repeat(4,minmax(0,1fr))_minmax(0,1.4fr)] gap-10 py-10">
+          {SHOP_COLUMNS.map((col) => (
+            <div key={col.title}>
+              <p className="eyebrow mb-3">{col.title}</p>
+              <ul className="grid">
+                {col.links.map(([to, label]) => (
+                  <li key={to}>
+                    <Link to={to} className="inline-flex min-h-9 items-center text-sm text-muted transition-colors hover:text-bone">
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+          <Link to={`/product/${FEATURED.id}`} className="group grid grid-cols-[132px_minmax(0,1fr)] items-center gap-5 self-start">
+            <div className="spot p-2">
+              <GarmentImage product={FEATURED} detail="card" />
+            </div>
+            <div className="grid gap-2">
+              <p className="eyebrow">Featured</p>
+              <p className="font-display text-xl font-semibold uppercase leading-tight tracking-[0.04em] transition-colors group-hover:text-gold">
+                {FEATURED.name}
+              </p>
+              <Price price={FEATURED.price} mrp={FEATURED.mrp} />
+            </div>
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 /** Route changes start at the top; hash links land on their section. */
 function ScrollManager() {
@@ -77,9 +223,14 @@ function ScrollManager() {
   return null
 }
 
+const countBadge =
+  'absolute right-0.5 top-1 flex h-[17px] min-w-[17px] items-center justify-center overflow-hidden rounded-full bg-gold px-1 text-[10px] font-semibold leading-none text-[var(--color-on-gold)]'
+
 export function Header() {
   const { count, setOpen } = useCart()
+  const wishlist = useWishlist()
   const [menu, setMenu] = useState(false)
+  const [search, setSearch] = useState(false)
   const [hidden, setHidden] = useState(false)
   const closeRef = useRef<HTMLButtonElement>(null)
   const { pathname } = useLocation()
@@ -97,6 +248,19 @@ export function Header() {
     }
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  // "/" opens search from anywhere that isn't a text field.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return
+      const target = e.target as HTMLElement | null
+      if (target?.closest('input, textarea, select, [contenteditable="true"]')) return
+      e.preventDefault()
+      setSearch(true)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
   }, [])
 
   useEffect(() => {
@@ -117,23 +281,22 @@ export function Header() {
     <>
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[110] focus:bg-gold focus:px-4 focus:py-2 focus:text-night"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[110] focus:bg-gold focus:px-4 focus:py-2 focus:text-[var(--color-on-gold)]"
       >
         Skip to content
       </a>
 
       <div className="border-b border-line bg-surface px-4 py-2.5 text-center text-[0.6875rem] font-medium uppercase tracking-[0.22em] text-gold">
-        Ships in 48 hours
-        <span aria-hidden="true" className="mx-3 text-faint">
-          ·
-        </span>
-        240 GSM cotton
-        <span className="hidden sm:inline">
-          <span aria-hidden="true" className="mx-3 text-faint">
-            ·
+        {STORE.announcement.map((item, i) => (
+          <span key={item} className={i > 1 ? 'hidden sm:inline' : undefined}>
+            {i > 0 && (
+              <span aria-hidden="true" className="mx-3 text-faint">
+                ·
+              </span>
+            )}
+            {item}
           </span>
-          Water-based inks
-        </span>
+        ))}
       </div>
 
       <header
@@ -154,11 +317,15 @@ export function Header() {
             >
               <IconMenu />
             </button>
-            {NAV_LEFT.map((n) => (
-              <NavLink key={n.to} to={n.to} className={desktopNavClass}>
-                {n.label}
-              </NavLink>
-            ))}
+            {NAV_LEFT.map((n) =>
+              n.to === '/shop' ? (
+                <ShopMenu key={n.to} />
+              ) : (
+                <NavLink key={n.to} to={n.to} className={desktopNavClass}>
+                  {n.label}
+                </NavLink>
+              ),
+            )}
           </nav>
 
           <Link to="/" aria-label={`${BRAND.short} home`}>
@@ -172,8 +339,19 @@ export function Header() {
               </NavLink>
             ))}
             <div className="flex items-center">
-              <Link to="/shop#search" className="icon-btn" aria-label="Search the catalogue">
+              <button type="button" className="icon-btn" aria-label="Search the catalogue" aria-haspopup="dialog" onClick={() => setSearch(true)}>
                 <IconSearch />
+              </button>
+              <Link to="/account" className="icon-btn hidden lg:grid" aria-label="Your account">
+                <IconUser />
+              </Link>
+              <Link to="/wishlist" className="icon-btn" aria-label={`Wishlist, ${wishlist.count} saved`}>
+                <IconHeart />
+                {wishlist.count > 0 && (
+                  <span aria-hidden="true" className={countBadge}>
+                    <SlidingNumber value={wishlist.count} />
+                  </span>
+                )}
               </Link>
               <button
                 type="button"
@@ -183,11 +361,8 @@ export function Header() {
               >
                 <IconBag />
                 {count > 0 && (
-                  <span
-                    aria-hidden="true"
-                    className="absolute right-0.5 top-1 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-gold px-1 text-[10px] font-semibold leading-none text-night"
-                  >
-                    {count}
+                  <span aria-hidden="true" className={countBadge}>
+                    <SlidingNumber value={count} />
                   </span>
                 )}
               </button>
@@ -195,6 +370,8 @@ export function Header() {
           </div>
         </div>
       </header>
+
+      {search && <SearchDialog onClose={() => setSearch(false)} />}
 
       {menu && (
         <div id="mobile-nav" role="dialog" aria-modal="true" aria-label="Menu" className="fixed inset-0 z-[70] flex flex-col bg-night lg:hidden">
@@ -204,24 +381,29 @@ export function Header() {
               <IconClose />
             </button>
           </div>
-          <nav className="shell flex flex-1 flex-col overflow-y-auto py-4" aria-label="Mobile">
-            {NAV_ALL.map((n) => (
-              <NavLink
-                key={n.to}
-                to={n.to}
-                className={({ isActive }) =>
-                  `flex min-h-14 items-center justify-between border-b border-line font-display text-2xl font-semibold uppercase tracking-[0.06em] ${
-                    isActive ? 'text-gold' : ''
-                  }`
-                }
-              >
-                {n.label}
-                <span aria-hidden="true" className="text-base text-gold">
-                  →
-                </span>
-              </NavLink>
-            ))}
-          </nav>
+          <div className="flex-1 overflow-y-auto">
+            <nav className="shell flex flex-col py-4" aria-label="Mobile">
+              {NAV_ALL.map((n) => (
+                <NavLink
+                  key={n.to}
+                  to={n.to}
+                  className={({ isActive }) =>
+                    `flex min-h-14 items-center justify-between border-b border-line font-display text-2xl font-semibold uppercase tracking-[0.06em] ${
+                      isActive ? 'text-gold' : ''
+                    }`
+                  }
+                >
+                  {n.label}
+                  <span aria-hidden="true" className="text-base text-gold">
+                    →
+                  </span>
+                </NavLink>
+              ))}
+            </nav>
+            <div className="shell pb-10 pt-4">
+              <ThemeOptionsInline />
+            </div>
+          </div>
         </div>
       )}
     </>
@@ -257,7 +439,7 @@ function ClubSignup() {
           <label htmlFor="club-email" className="sr-only">
             Email address
           </label>
-          <div className="grid sm:grid-cols-[1fr_auto]">
+          <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
             <input
               id="club-email"
               name="email"
@@ -267,7 +449,7 @@ function ClubSignup() {
               placeholder="Enter your email"
               aria-invalid={status?.tone === 'err' ? true : undefined}
               aria-describedby="club-status"
-              className="input sm:border-r-0"
+              className="input"
             />
             <button type="submit" className="btn btn-primary">
               Subscribe
@@ -309,7 +491,7 @@ export function Footer() {
         <div>
           <h2 className="eyebrow mb-4">Payments at launch</h2>
           <ul className="flex flex-wrap gap-2" aria-label="Payment methods planned for launch">
-            {['UPI', 'RuPay', 'Visa', 'Mastercard'].map((m) => (
+            {STORE.payments.map((m) => (
               <li key={m} className="border border-line px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
                 {m}
               </li>
@@ -321,7 +503,14 @@ export function Footer() {
       <div className="border-t border-line">
         <div className="shell flex flex-wrap justify-between gap-2 py-5">
           <p className="micro">© {new Date().getFullYear()} BKC</p>
-          <p className="micro">{BRAND.full}</p>
+          <nav aria-label="Legal" className="flex gap-5">
+            <Link to="/policies/privacy" className="micro transition-colors hover:text-bone">
+              Privacy
+            </Link>
+            <Link to="/policies/terms" className="micro transition-colors hover:text-bone">
+              Terms
+            </Link>
+          </nav>
         </div>
       </div>
     </footer>
@@ -333,15 +522,12 @@ function colourName(key: string) {
 }
 
 export function CartDrawer() {
-  const { items, open, setOpen, total, count, setQty, removeItem, clear } = useCart()
-  const [notice, setNotice] = useState('')
+  const { items, open, setOpen, count, setQty, removeItem, clear, coupon } = useCart()
   const closeRef = useRef<HTMLButtonElement>(null)
+  const totals = computeTotals(items, { coupon })
 
   useEffect(() => {
-    if (!open) {
-      setNotice('')
-      return
-    }
+    if (!open) return
     closeRef.current?.focus()
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setOpen(false)
@@ -375,6 +561,12 @@ export function CartDrawer() {
           </button>
         </div>
 
+        {items.length > 0 && (
+          <div className="border-b border-line px-5 py-4">
+            <FreeShippingBar totals={totals} />
+          </div>
+        )}
+
         <div className="flex-1 overflow-y-auto">
           {items.length === 0 ? (
             <div className="grid justify-items-center gap-4 px-6 py-16 text-center">
@@ -389,7 +581,9 @@ export function CartDrawer() {
               {items.map((item) => (
                 <li key={item.key} className="grid grid-cols-[84px_1fr] gap-4 border-b border-line p-5">
                   <div className="spot p-1.5">
-                    <Tee
+                    <GarmentImage
+                      type={item.type}
+                      image={item.image}
                       fit={item.fit}
                       teeHex={item.teeHex}
                       printHex={item.printHex}
@@ -432,21 +626,31 @@ export function CartDrawer() {
         </div>
 
         <div className="grid gap-3 border-t border-line p-5">
+          {totals.discount > 0 && (
+            <p className="flex justify-between text-sm text-muted">
+              <span>Discount ({totals.coupon?.code})</span>
+              <span className="tabular-nums text-success">−{money(totals.discount)}</span>
+            </p>
+          )}
           <div className="flex items-baseline justify-between font-display text-2xl font-semibold uppercase tracking-[0.06em]">
             <span>Total</span>
-            <span className="tabular-nums">{money(total)}</span>
+            <AnimatedNumber value={totals.subtotal - totals.discount} format={money} />
           </div>
-          <button
-            type="button"
-            className="btn btn-primary w-full"
-            disabled={!items.length}
-            onClick={() => setNotice('Payments open at launch. Nothing was charged.')}
-          >
-            Checkout
-          </button>
-          <p role="status" className="min-h-[1.4em] text-center text-sm text-muted">
-            {notice}
-          </p>
+          {items.length > 0 ? (
+            <div className="grid grid-cols-2 gap-2">
+              <Link to="/cart" className="btn btn-secondary px-3" onClick={() => setOpen(false)}>
+                View bag
+              </Link>
+              <Link to="/checkout" className="btn btn-primary px-3" onClick={() => setOpen(false)}>
+                Checkout
+              </Link>
+            </div>
+          ) : (
+            <button type="button" className="btn btn-primary w-full" disabled>
+              Checkout
+            </button>
+          )}
+          {STORE.demo && <p className="text-center text-xs text-muted">Demo store: no payment is taken.</p>}
           {items.length > 0 && (
             <button type="button" className="u micro justify-self-center text-bone" onClick={clear}>
               Clear bag
@@ -459,9 +663,11 @@ export function CartDrawer() {
 }
 
 export function Layout({ children }: { children: ReactNode }) {
+  const { pathname } = useLocation()
   return (
     <div className="flex min-h-dvh flex-col">
       <ScrollManager />
+      {/^\/blog\/.+/.test(pathname) && <ScrollProgress />}
       <Header />
       <main id="main" className="flex-1">
         {children}
@@ -469,6 +675,8 @@ export function Layout({ children }: { children: ReactNode }) {
       <ClubSignup />
       <Footer />
       <CartDrawer />
+      <BackToTop />
+      <ThemePicker />
     </div>
   )
 }

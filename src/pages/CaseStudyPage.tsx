@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom'
+import { usePageTitle } from '../lib/usePageTitle'
 import { PRODUCTS } from '../data/catalog'
 import { BRAND } from '../data/states'
 import { SectionHead } from '../components/ProductCard'
 
 export function CaseStudyPage() {
+  usePageTitle('Case study')
   return (
     <article className="mx-auto max-w-3xl px-[clamp(1rem,0.5rem+2.5vw,3rem)] py-10 md:py-14">
       <p className="eyebrow">Portfolio case study</p>
@@ -11,7 +13,7 @@ export function CaseStudyPage() {
         BKC: soft-censor humour + India slang atlas
       </h1>
       <p className="lede mt-5 max-w-none">
-        Role: founder / designer / engineer · Stack: React, Vite, Tailwind, Framer Motion, three.js · Host: GitHub Pages
+        Role: founder / designer / engineer · Stack: React, Vite, Tailwind, Framer Motion · Host: GitHub Pages
       </p>
 
       <section className="mt-14" aria-labelledby="cs-gap">
@@ -43,6 +45,7 @@ export function CaseStudyPage() {
             'Chooser blogs: fit, slang atlas, soft-censor brand, how to pick',
             'Mobile-first PLP, sticky ATC, procedural SVG garments',
             'Dark-luxury redesign with a documented design system and WCAG AA contrast',
+            'Catalogue driven by a product spreadsheet, with photo mockups built in the browser',
           ].map((item) => (
             <li key={item} className="border-b border-line py-3 text-muted">
               {item}

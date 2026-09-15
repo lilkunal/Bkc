@@ -1,5 +1,13 @@
+import { STORE } from '../store.config'
+
+const currency = new Intl.NumberFormat(STORE.currency.locale, {
+  style: 'currency',
+  currency: STORE.currency.code,
+  maximumFractionDigits: 0,
+})
+
 export function money(n: number) {
-  return '₹' + Number(n).toLocaleString('en-IN')
+  return currency.format(Number(n))
 }
 
 export function discount(price: number, mrp: number) {

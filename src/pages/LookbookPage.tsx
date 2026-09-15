@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
+import { usePageTitle } from '../lib/usePageTitle'
 import { PRODUCTS, type Product } from '../data/catalog'
-import { Tee } from '../components/Tee'
+import { GarmentImage } from '../components/GarmentImage'
 import { SectionHead } from '../components/ProductCard'
 
 type Look = {
@@ -26,6 +27,7 @@ function resolve(look: Look): Product {
 }
 
 export function LookbookPage() {
+  usePageTitle('Lookbook')
   const shots = LOOKS.map((look) => ({ ...look, product: resolve(look) }))
 
   return (
@@ -71,7 +73,7 @@ export function LookbookPage() {
         {shots.map((s) => (
           <figure key={s.label} className="group m-0 grid content-start gap-4">
             <Link to={`/product/${s.product.id}`} tabIndex={-1} aria-hidden="true" className="spot block overflow-hidden p-8">
-              <Tee
+              <GarmentImage
                 product={s.product}
                 detail="high"
                 className="mx-auto max-w-[280px] transition-transform duration-700 ease-lux group-hover:scale-[1.03]"

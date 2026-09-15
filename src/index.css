@@ -460,6 +460,42 @@
       radial-gradient(90% 70% at 50% 40%, rgba(242, 236, 224, 0.05), transparent 72%);
   }
 
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  /* home hero: garment mockup that tilts towards the mouse and floats gently */
+  .tilt-stage {
+    position: relative;
+    perspective: 1200px;
+  }
+  .tilt-card {
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform 0.6s var(--ease-lux);
+    will-change: transform;
+    animation: garment-float 7s ease-in-out infinite;
+  }
+  .tilt-shadow {
+    width: 58%;
+    height: 22px;
+    margin: -6px auto 0;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(0, 0, 0, 0.55), transparent);
+    filter: blur(6px);
+    animation: garment-shadow 7s ease-in-out infinite;
+  }
+  @keyframes garment-float {
+    50% {
+      translate: 0 -8px;
+    }
+  }
+  @keyframes garment-shadow {
+    50% {
+      scale: 0.92;
+      opacity: 0.75;
+    }
+  }
+
   /* journal article body */
   .prose-bkc {
     color: var(--color-bone);
@@ -503,6 +539,259 @@
   .prose-bkc ul,
   .prose-bkc ol {
     padding-left: 1.25rem;
+  }
+
+  /* home hero: three.js silk (components/HeroBackdrop.tsx) under a scrim that keeps the copy readable */
+  .hero-canvas {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .hero-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(11, 10, 8, 0.9) 0%, rgba(11, 10, 8, 0.7) 40%, rgba(11, 10, 8, 0.25) 70%, var(--color-night) 100%);
+  }
+  @media (min-width: 48rem) {
+    .hero-scrim {
+      background:
+        linear-gradient(90deg, var(--color-night) 0%, rgba(11, 10, 8, 0.92) 36%, rgba(11, 10, 8, 0.3) 60%, rgba(11, 10, 8, 0.3) 100%),
+        linear-gradient(180deg, transparent 70%, var(--color-night));
+    }
+  }
+
+  /* 3D collection ring (components/CollectionRing.tsx) */
+  .ring-stage {
+    position: relative;
+    height: clamp(380px, 20rem + 16vw, 640px);
+  }
+  .ring-stage::before {
+    content: "";
+    position: absolute;
+    inset: auto 14% 6%;
+    height: 45%;
+    background: radial-gradient(closest-side, rgba(201, 162, 74, 0.1), transparent);
+    pointer-events: none;
+  }
+  .ring-canvas {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: pan-y;
+    cursor: grab;
+  }
+  .ring-canvas:active {
+    cursor: grabbing;
+  }
+
+  /* product card: wishlist heart and quick view */
+  .card-actions {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    z-index: 2;
+    display: grid;
+    gap: 0.4rem;
+  }
+  .card-action {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--color-line);
+    background: rgba(11, 10, 8, 0.72);
+    color: var(--color-bone);
+    backdrop-filter: blur(4px);
+    transition:
+      color 0.3s var(--ease-lux),
+      border-color 0.3s var(--ease-lux),
+      opacity 0.4s var(--ease-lux),
+      translate 0.4s var(--ease-lux);
+  }
+  .card-action:hover,
+  .card-action[aria-pressed="true"] {
+    color: var(--color-gold);
+    border-color: var(--color-gold);
+  }
+  .card-action-quick {
+    display: none;
+  }
+  @media (min-width: 40rem) {
+    .card-action-quick {
+      display: grid;
+    }
+  }
+  @media (hover: hover) {
+    .card-action-quick {
+      opacity: 0;
+      translate: 6px 0;
+    }
+    .group:hover .card-action-quick,
+    .card-action-quick:focus-visible {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+  .btn-secondary[aria-pressed="true"] {
+    background: rgba(201, 162, 74, 0.14);
+  }
+
+  .stepper-lg button {
+    width: 44px;
+    height: 46px;
+  }
+  .stepper button:disabled {
+    color: var(--color-faint);
+    cursor: not-allowed;
+  }
+
+  /* review search matches */
+  .hl {
+    padding: 0 0.1em;
+    background: rgba(201, 162, 74, 0.28);
+    color: var(--color-bone);
+  }
+
+  /* endless product strip (components/Marquee.tsx) */
+  .marquee {
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  }
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee-scroll 80s linear infinite;
+  }
+  .marquee:hover .marquee-track,
+  .marquee:focus-within .marquee-track,
+  .marquee.is-paused .marquee-track {
+    animation-play-state: paused;
+  }
+  .marquee-row {
+    display: flex;
+    gap: 1rem;
+    margin: 0;
+    padding: 0 0.5rem;
+    list-style: none;
+  }
+  @keyframes marquee-scroll {
+    to {
+      translate: -50% 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .marquee {
+      overflow-x: auto;
+      mask-image: none;
+    }
+    .marquee-track {
+      animation: none;
+    }
+  }
+
+  /* review carousel (components/Testimonials.tsx) */
+  .t-track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 86%;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .t-track::-webkit-scrollbar {
+    display: none;
+  }
+  .t-track > li {
+    scroll-snap-align: start;
+  }
+  @media (min-width: 40rem) {
+    .t-track {
+      grid-auto-columns: calc((100% - 1rem) / 2);
+    }
+  }
+  @media (min-width: 64rem) {
+    .t-track {
+      grid-auto-columns: calc((100% - 2rem) / 3);
+    }
+  }
+
+  /* product image lightbox (components/Lightbox.tsx) */
+  .lightbox-stage {
+    height: 100%;
+    max-width: 100%;
+    aspect-ratio: 4 / 5;
+    cursor: zoom-in;
+    transition: scale 0.6s var(--ease-lux);
+  }
+  .lightbox-stage.is-zoomed {
+    scale: 2.2;
+    cursor: zoom-out;
+  }
+
+  /* desktop shop mega menu */
+  .mega-menu {
+    position: absolute;
+    inset-inline: 0;
+    top: 100%;
+    border-block: 1px solid var(--color-line);
+    background: rgba(20, 18, 15, 0.98);
+    box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.8);
+    animation: menu-in 0.35s var(--ease-lux);
+  }
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      translate: 0 -6px;
+    }
+  }
+
+  .back-top {
+    position: fixed;
+    right: clamp(1rem, 0.5rem + 2vw, 2rem);
+    bottom: calc(1.25rem + env(safe-area-inset-bottom));
+    z-index: 45;
+    display: none;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border: 1px solid var(--color-gold);
+    background: rgba(11, 10, 8, 0.85);
+    color: var(--color-gold);
+    backdrop-filter: blur(6px);
+    opacity: 0;
+    visibility: hidden;
+    translate: 0 10px;
+    transition:
+      opacity 0.4s var(--ease-lux),
+      translate 0.4s var(--ease-lux),
+      visibility 0.4s,
+      background-color 0.3s var(--ease-lux),
+      color 0.3s var(--ease-lux);
+  }
+  .back-top:hover {
+    background: var(--color-gold);
+    color: var(--color-night);
+  }
+  .back-top.is-shown {
+    opacity: 1;
+    visibility: visible;
+    translate: 0 0;
+  }
+  @media (min-width: 48rem) {
+    .back-top {
+      display: grid;
+    }
   }
 }
 

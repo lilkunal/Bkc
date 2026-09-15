@@ -1,9 +1,11 @@
 import { Link, useSearchParams } from 'react-router-dom'
+import { usePageTitle } from '../lib/usePageTitle'
 import { BRAND, STATES } from '../data/states'
 import { filterProducts } from '../data/catalog'
 import { SectionHead } from '../components/ProductCard'
 
 export function StatesPage() {
+  usePageTitle('Shop by state')
   const [params] = useSearchParams()
   const focus = params.get('state') || ''
 

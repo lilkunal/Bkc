@@ -1,4 +1,5 @@
 import { SectionHead } from '../components/ProductCard'
+import { usePageTitle } from '../lib/usePageTitle'
 
 const STATS: [string, string][] = [
   ['$0.57B', 'India custom tee printing, 2024'],
@@ -49,6 +50,7 @@ const ECONOMICS: { label: string; value: string; total?: boolean }[] = [
 ]
 
 export function MarketPage() {
+  usePageTitle('Market file')
   return (
     <div className="shell py-10 md:py-14">
       <SectionHead

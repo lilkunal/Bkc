@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom'
+import { usePageTitle } from '../lib/usePageTitle'
 import { CATEGORIES, COLLECTIONS, filterProducts } from '../data/catalog'
 import { SectionHead } from '../components/ProductCard'
-import { Tee } from '../components/Tee'
+import { GarmentImage } from '../components/GarmentImage'
 
 export function CollectionsPage() {
+  usePageTitle('Collections')
   return (
     <div className="shell py-10 md:py-14">
       <SectionHead level={1} eyebrow="Curated capsules" title="Collections" note="Ten ways into the catalogue, plus every taste category." />
@@ -17,7 +19,7 @@ export function CollectionsPage() {
             <Link key={c.key} to={`/shop?${qs}`} className="group grid content-start gap-4">
               <div className="spot grid aspect-[4/3] place-items-center overflow-hidden p-6">
                 {lead && (
-                  <Tee product={lead} detail="card" className="w-[58%] transition-transform duration-700 ease-lux group-hover:scale-[1.03]" />
+                  <GarmentImage product={lead} detail="card" className="w-[62%] transition-transform duration-700 ease-lux group-hover:scale-[1.03]" />
                 )}
               </div>
               <div className="grid gap-1.5">

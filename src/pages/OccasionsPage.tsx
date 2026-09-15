@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom'
+import { usePageTitle } from '../lib/usePageTitle'
 import { OCCASIONS, filterProducts } from '../data/catalog'
 import { SectionHead } from '../components/ProductCard'
 
 export function OccasionsPage() {
+  usePageTitle('Occasions')
   return (
     <div className="shell py-10 md:py-14">
       <SectionHead

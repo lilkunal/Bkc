@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useSearchParams } from 'react-router-dom'
-import { CATEGORIES, COLORS, FITS, OCCASIONS, PRODUCTS, filterProducts } from '../data/catalog'
+import { usePageTitle } from '../lib/usePageTitle'
+import { money } from '../lib/format'
+import { CATEGORIES, COLORS, GARMENTS, OCCASIONS, PRODUCTS, PRODUCT_TYPES, filterProducts, fitOptions, priceBands } from '../data/catalog'
 import { STATES } from '../data/states'
 import { ProductCard, SectionHead } from '../components/ProductCard'
 import { IconClose } from '../components/Icons'
@@ -10,29 +12,37 @@ type Group = { key: string; label: string; options: Option[] }
 
 const SORTS: Option[] = [
   ['featured', 'Featured'],
+  ['newest', 'Newest'],
   ['reviews', 'Most reviewed'],
   ['rating', 'Top rated'],
   ['price-asc', 'Price: low to high'],
   ['price-desc', 'Price: high to low'],
 ]
 
+const AUDIENCES: Option[] = [
+  ['men', 'Men'],
+  ['women', 'Women'],
+  ['unisex', 'Unisex'],
+  ['kids', 'Kids'],
+]
+
+const FILTER_KEYS = ['type', 'under', 'fit', 'cat', 'occ', 'aud', 'color', 'state', 'region', 'q']
+
+const PRICE_OPTIONS: Option[] = priceBands().map((b): Option => [String(b.under), `Under ${money(b.under)}`])
+
+/** Products shown per "page"; more load on request. */
+const PAGE = 24
+
 export function ShopPage() {
+  usePageTitle('Shop everything')
   const [params, setParams] = useSearchParams()
   const [sheet, setSheet] = useState(false)
+  const [limit, setLimit] = useState(PAGE)
   const { hash } = useLocation()
   const searchRef = useRef<HTMLInputElement>(null)
 
-  const filters: Record<string, string> = {
-    fit: params.get('fit') || '',
-    cat: params.get('cat') || '',
-    occ: params.get('occ') || '',
-    aud: params.get('aud') || '',
-    color: params.get('color') || '',
-    state: params.get('state') || '',
-    region: params.get('region') || '',
-    q: params.get('q') || '',
-    sort: params.get('sort') || 'featured',
-  }
+  const filters: Record<string, string> = Object.fromEntries(FILTER_KEYS.map((k) => [k, params.get(k) || '']))
+  filters.sort = params.get('sort') || 'featured'
 
   useEffect(() => {
     if (hash === '#search') searchRef.current?.focus()
@@ -56,30 +66,28 @@ export function ShopPage() {
     if (!value) next.delete(key)
     else next.set(key, value)
     if (key === 'state') next.delete('region')
+    if (key === 'type') next.delete('fit')
     setParams(next, { replace: true })
   }
 
   const clearAll = () => setParams({}, { replace: true })
 
   const query = params.toString()
+
+  useEffect(() => {
+    setLimit(PAGE)
+  }, [query])
+
   const results = useMemo(() => {
     const p = new URLSearchParams(query)
-    const get = (k: string) => p.get(k) || undefined
-    let list = filterProducts({
-      fit: get('fit'),
-      cat: get('cat'),
-      occ: get('occ'),
-      aud: get('aud'),
-      color: get('color'),
-      state: get('state'),
-      region: get('region'),
-      q: get('q'),
-    })
+    const filter = Object.fromEntries(FILTER_KEYS.map((k) => [k, p.get(k) || undefined]))
+    let list = filterProducts(filter)
     const sort = p.get('sort')
+    if (sort === 'newest') list = [...list].reverse()
     if (sort === 'price-asc') list = [...list].sort((a, b) => a.price - b.price)
     if (sort === 'price-desc') list = [...list].sort((a, b) => b.price - a.price)
-    if (sort === 'rating') list = [...list].sort((a, b) => b.rating - a.rating)
-    if (sort === 'reviews') list = [...list].sort((a, b) => b.reviews - a.reviews)
+    if (sort === 'rating') list = [...list].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+    if (sort === 'reviews') list = [...list].sort((a, b) => (b.reviews ?? 0) - (a.reviews ?? 0))
     return list
   }, [query])
 
@@ -88,23 +96,32 @@ export function ShopPage() {
     ? stateEntry.regions.map((r): Option => [r.key, `${r.label} (${r.lang})`])
     : STATES.flatMap((s) => s.regions.map((r): Option => [r.key, `${s.label} · ${r.label}`]))
 
+  const hasStates = PRODUCTS.some((p) => p.state)
+  const usedOccasions = OCCASIONS.filter((o) => PRODUCTS.some((p) => p.occasions.includes(o.key)))
+  const usedAudiences = AUDIENCES.filter(([key]) => PRODUCTS.some((p) => p.audience.includes(key)))
+  const fitList = filters.type && PRODUCT_TYPES.includes(filters.type as never)
+    ? Object.values(GARMENTS[filters.type as keyof typeof GARMENTS].fits).map((f): Option => [f.key, f.label])
+    : fitOptions()
+  const priceList: Option[] =
+    filters.under && !PRICE_OPTIONS.some(([v]) => v === filters.under)
+      ? [...PRICE_OPTIONS, [filters.under, `Under ${money(Number(filters.under))}`]]
+      : PRICE_OPTIONS
+
+  // Only offer filters the sheet actually has data for.
   const groups: Group[] = [
-    { key: 'fit', label: 'Fit', options: Object.values(FITS).map((f): Option => [f.key, f.label]) },
+    ...(PRODUCT_TYPES.length > 1 ? [{ key: 'type', label: 'Garment', options: PRODUCT_TYPES.map((t): Option => [t, GARMENTS[t].plural]) }] : []),
+    ...(priceList.length ? [{ key: 'under', label: 'Price', options: priceList }] : []),
+    { key: 'fit', label: 'Fit', options: fitList },
     { key: 'cat', label: 'Category', options: CATEGORIES.map((c): Option => [c.key, c.label]) },
-    { key: 'occ', label: 'Occasion', options: OCCASIONS.map((o): Option => [o.key, o.label]) },
-    {
-      key: 'aud',
-      label: 'Wearer',
-      options: [
-        ['men', 'Men'],
-        ['women', 'Women'],
-        ['unisex', 'Unisex'],
-        ['kids', 'Kids'],
-      ],
-    },
-    { key: 'state', label: 'State', options: STATES.map((s): Option => [s.key, s.label]) },
-    { key: 'region', label: 'Region / tongue', options: regionOptions },
-    { key: 'color', label: 'Colour', options: Object.entries(COLORS).map(([k, v]): Option => [k, v.name]) },
+    ...(usedOccasions.length ? [{ key: 'occ', label: 'Occasion', options: usedOccasions.map((o): Option => [o.key, o.label]) }] : []),
+    ...(usedAudiences.length ? [{ key: 'aud', label: 'Wearer', options: usedAudiences }] : []),
+    ...(hasStates
+      ? [
+          { key: 'state', label: 'State', options: STATES.filter((s) => PRODUCTS.some((p) => p.state === s.key)).map((s): Option => [s.key, s.label]) },
+          { key: 'region', label: 'Region / tongue', options: regionOptions },
+        ]
+      : []),
+    { key: 'color', label: 'Colour', options: Object.values(COLORS).map((c): Option => [c.key, c.name]) },
   ]
 
   const active = [
@@ -134,13 +151,15 @@ export function ShopPage() {
     </div>
   )
 
+  const shown = Math.min(limit, results.length)
+
   return (
     <div className="shell py-10 md:py-14">
       <SectionHead
         level={1}
         eyebrow={`Catalogue · ${PRODUCTS.length} designs`}
         title="Shop everything"
-        note="Cross-filter by fit, taste, occasion, wearer, state and colour. Every filter lives in the URL, so any view can be shared."
+        note="Cross-filter by garment, price, fit, category and colour. Every filter lives in the URL, so any view can be shared."
       />
 
       <div className="mb-5 grid gap-4 border-y border-line py-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
@@ -154,7 +173,7 @@ export function ShopPage() {
             type="search"
             value={filters.q}
             onChange={(e) => set('q', e.target.value)}
-            placeholder="Search: Maggi, vote, gaay…"
+            placeholder="Search designs, colours, regions…"
             className="input scroll-mt-32"
           />
         </div>
@@ -205,10 +224,25 @@ export function ShopPage() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-x-4 gap-y-8 lg:grid-cols-3 xl:grid-cols-4">
-            {results.map((p, i) => (
-              <ProductCard key={p.id} product={p} index={i} />
-            ))}
+          <div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8 lg:grid-cols-3 xl:grid-cols-4">
+              {results.slice(0, limit).map((p, i) => (
+                <ProductCard key={p.id} product={p} index={Math.max(0, i - (limit - PAGE))} />
+              ))}
+            </div>
+            <div className="mt-12 grid justify-items-center gap-4">
+              <p className="micro">
+                Showing {shown} of {results.length}
+              </p>
+              <div className="ship-meter w-56" aria-hidden="true">
+                <span className="ship-meter-fill transition-transform duration-500 ease-lux" style={{ transform: `scaleX(${shown / results.length})` }} />
+              </div>
+              {limit < results.length && (
+                <button type="button" className="btn btn-secondary" onClick={() => setLimit((n) => n + PAGE)}>
+                  Load {Math.min(PAGE, results.length - limit)} more
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -225,7 +259,7 @@ export function ShopPage() {
             </div>
             {renderFields('m')}
             <button type="button" className="btn btn-primary mt-6 w-full" onClick={() => setSheet(false)}>
-              Show {results.length} tees
+              Show {results.length} designs
             </button>
           </div>
         </div>

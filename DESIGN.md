@@ -84,8 +84,10 @@ Rules: never set small text in `faint` or `line`. Placeholders use `muted`.
 - **Approach:** Intentional and slow.
 - **Easing:** `--ease-lux: cubic-bezier(0.2, 0.7, 0.2, 1)` (utility `ease-lux`).
 - **Durations:** micro 150–250ms (colour), medium 350–500ms (underline draw, fades), long 600–700ms (image zoom).
-- **Patterns:** cards fade up once on scroll · product tees zoom to 1.03× on hover · links draw a 1px underline · the 3D hero tee floats, sways slowly and cycles print faces every 3.5s with a Pause control.
-- **Reduced motion:** all transitions collapse to ~0 and the font rotation stops.
+- **Patterns:** cards fade up once on scroll · product tees zoom to 1.03× on hover and cross-fade to their second colourway · links draw a 1px underline · the hero garment floats, tilts towards the mouse and cycles print faces every 3.5s with a Pause control.
+- **3D (three.js, `src/three/`):** a separate chunk loaded on Home only. *Hero backdrop:* dark satin with tight gold glints and drifting dust, rippling under the mouse; it sits right of the headline, behind `.hero-scrim`, so copy keeps its contrast. *Collection ring:* ten curved product cards on a cylinder with a faint floor reflection; drag or swipe to spin, it snaps card by card, advances every ~4s, and draws a thin gold frame on the front card. Both pause off screen and in background tabs, cap pixel ratio at 1.75, and fall back without WebGL (CSS glow; a normal product row).
+- **Things that move on their own** (print faces, ring, review carousel, product strip) pause on hover or focus and always have a visible Pause control.
+- **Reduced motion:** all transitions collapse to ~0, the font rotation stops, the hero silk renders one still frame, the ring jumps instead of spinning and never advances by itself, and the product strip becomes a plain horizontal scroller.
 
 ## Signature Rules (the three risks)
 1. **The seal.** चू inside a double gold ring replaces the Grammer crown. Header, footer, favicon, About only. Never smaller than 32px; 46px in the header.
@@ -98,15 +100,21 @@ Rules: never set small text in `faint` or `line`. Placeholders use `muted`.
 - **Selectors:** `.chip-btn` (fit, print face), `.size-btn` (gold fill when pressed), `.swatch` (44px, gold outline when pressed). All expose `aria-pressed`.
 - **Feedback:** no `alert()`. Inline `role="status"` messages in `success` / `error`.
 - **Headings:** every page has exactly one `h1` (`SectionHead level={1}` or an explicit `h1`).
+- **Dialogs:** quick view and the image lightbox render through a portal and use `useDialog` (focus moves in, Tab stays inside, Escape closes, page scroll locks, focus returns to the trigger).
+- **Card actions:** `.card-action`, 40px squares on the tile's top-right: the wishlist heart (always) and quick view (on hover or focus, 640px and up). The badge keeps the top-left.
+- **Carousels:** scroll-snap tracks with square prev/next `icon-btn`s; the collection ring uses the same arrows under its caption.
+- **Mega menu:** desktop only, hangs full-width from the header; opens on hover (120ms intent delay) or the chevron button, closes on Escape, outside click, scroll or route change.
 
 ## Content Honesty
-- No invented reviews or testimonials. Product ratings are catalogue demo data.
+- Reviews come from `catalog/reviews.csv`. In the demo they are sample content and say so (the Home carousel eyebrow and a note under the product rating summary). A live store must replace them with real reviews or leave the sheet empty. Product ratings are catalogue demo data.
 - Payment methods are labelled "at launch"; checkout says nothing is charged.
 - The lookbook photo is disclosed as a generated still.
 
 ## Imagery
-- **Home hero:** a real-time 3D tee (`src/components/Tee3D.tsx`, three.js via @react-three/fiber). The silhouette is extruded from the same SVG path the shop renders use (`teeShape()` in `src/lib/tee.ts`), and the print is painted live in the selected print face. Lazy-loaded: the flat SVG tee shows while it loads, when WebGL is unavailable, or if the scene errors. Drag-to-turn only on fine pointers, so touch scrolling is never hijacked. Motion stops for reduced-motion users.
+- **Garment images:** `src/components/GarmentImage.tsx` shows the product photo from the sheet when there is one; otherwise it builds a photo mockup in the browser (`src/lib/mockup.ts`) by recolouring a blank garment photo and printing the design onto it, following the folds. Blank photos go in `public/mockups/blank-<type>.jpg`; `python scripts/prepare-mockups.py` turns them into maps. Garment types without a map fall back to the drawn tee.
+- **Home hero:** the featured product as a photo mockup that tilts a few degrees towards the mouse (mouse only) and floats gently; every print face is pre-built so the rotation swaps instantly. Motion stops for reduced-motion users.
 - **Lookbook photo:** `public/media/hero-kunal.webp` (1024×1536), crop anchor 42%. The model photo is not used in the home hero.
+- **3D ring cards:** `src/three/garmentCard.ts` paints each product onto a `.spot`-style canvas card in the same order of preference (photo, photo mockup, drawn garment with its print).
 - Product imagery: `src/lib/tee.ts` procedural SVG garments.
 
 ## Decisions Log
@@ -118,3 +126,11 @@ Rules: never set small text in `faint` or `line`. Placeholders use `muted`.
 | 2026-09-10 | Nav trimmed to Shop, States, Collections, Journal, About | Grammer-style header; Occasions, Lookbook, Market and Case study move to the mobile menu and footer |
 | 2026-09-10 | Emoji removed from interface cards | They undercut the luxury frame; rendered tees and type do the work |
 | 2026-09-10 | Home hero: 3D tee replaces the model photo | Founder request. The product is the hero, and reusing the shop silhouette keeps 2D and 3D identical |
+| 2026-09-11 | Photo mockups replace drawn tees; 3D hero replaced by a tilting mockup | Founder wanted garments that look real. Blank garment photos are recoloured and printed in the browser; removing three.js also drops a 258 KB download |
+| 2026-09-11 | Products come from `catalog/products.csv` | The store is a reusable template: swap the sheet, not the code |
+| 2026-09-12 | three.js returns as ambience, not as the garment | Founder asked for 3D animation. The photo mockup stays the product hero; three.js adds the satin backdrop and a 3D collection ring, lazy-loaded on Home only, with Pause, reduced-motion and no-WebGL fallbacks |
+| 2026-09-12 | Features taken from three reference repos | influencer-hugo (MIT): home sections as data with on/off switches, pull quote, testimonial slider, latest posts. react-e-commerce- and Organica (no licence, so ideas only): mega menu, hover colourway, price bands, review search with topic chips, product strip, wishlist, quick view, back to top |
+| 2026-09-15 | Six themes instead of one fixed palette | Founder asked for Scrolltide-style themes. Moods picked from its public previews; palettes, fonts and code are original (its templates are paid). Tokens live in `src/themes.ts`; the Midnight Gold rules above describe the default theme. Every theme keeps AA contrast |
+| 2026-09-15 | Corners and fonts vary by theme | `--radius`, `--radius-card` and `--display-weight` let Sandstone and Monsoon use pills and soft cards while Midnight stays square; "radius 0" now applies to Midnight and Garnet only |
+| 2026-09-15 | Full store flow added | Bag page, coupons, GST-inclusive totals, four-step checkout, order history, simulated tracking, predictive search. All client-side for the demo |
+| 2026-09-12 | Sample reviews allowed, labelled | Replaces "no invented reviews" for the portfolio demo. The labels stay while `STORE.demo` is on; `catalog/reviews.csv` is where a real store puts real reviews |

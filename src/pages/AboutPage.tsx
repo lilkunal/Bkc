@@ -1,10 +1,16 @@
 import { useState } from 'react'
-import { FITS } from '../data/catalog'
+import { usePageTitle } from '../lib/usePageTitle'
+import { GARMENTS, PRODUCTS } from '../data/catalog'
 import { BRAND } from '../data/states'
 import { SectionHead } from '../components/ProductCard'
 import { Wordmark } from '../components/Brand'
 
+const FIT_CARDS = [...new Set(PRODUCTS.map((p) => p.type))].flatMap((type) =>
+  Object.values(GARMENTS[type].fits).map((fit) => ({ garment: GARMENTS[type], fit })),
+)
+
 export function AboutPage() {
+  usePageTitle('About')
   const [sent, setSent] = useState(false)
 
   return (
@@ -54,12 +60,14 @@ export function AboutPage() {
       </div>
 
       <section id="fits" className="mt-20 scroll-mt-32" aria-labelledby="fits-title">
-        <SectionHead eyebrow="Fits & GSM" title="Four cuts" id="fits-title" />
+        <SectionHead eyebrow="Fits & fabrics" title="Cuts we make" id="fits-title" />
         <div className="grid border-l border-t border-line sm:grid-cols-2 lg:grid-cols-4">
-          {Object.values(FITS).map((f) => (
-            <article key={f.key} className="grid content-start gap-2 border-b border-r border-line p-6">
+          {FIT_CARDS.map(({ garment, fit: f }) => (
+            <article key={`${garment.key}-${f.key}`} className="grid content-start gap-2 border-b border-r border-line p-6">
               <h3 className="font-display text-2xl font-semibold uppercase tracking-[0.05em]">{f.label}</h3>
-              <p className="eyebrow">{f.gsm} GSM</p>
+              <p className="eyebrow">
+                {garment.label} · {f.weight}
+              </p>
               <p className="text-sm text-muted">{f.blurb}</p>
               <p className="micro mt-2">Sizes: {f.sizes.join(', ')}</p>
             </article>

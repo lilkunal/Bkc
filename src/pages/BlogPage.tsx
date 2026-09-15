@@ -1,8 +1,10 @@
 import { Link, useParams } from 'react-router-dom'
+import { usePageTitle } from '../lib/usePageTitle'
 import { POSTS, postBySlug } from '../data/blog'
 import { SectionHead } from '../components/ProductCard'
 
 export function BlogPage() {
+  usePageTitle('Journal')
   return (
     <div className="shell py-10 md:py-14">
       <SectionHead level={1} eyebrow="The Journal" title="Read before you print" note="Fit guides, the slang atlas, and why a gaali became a brand." />
@@ -31,6 +33,7 @@ export function BlogPage() {
 export function PostPage() {
   const { slug } = useParams()
   const post = postBySlug(slug || '')
+  usePageTitle(post?.title ?? 'Post not found')
 
   if (!post) {
     return (
