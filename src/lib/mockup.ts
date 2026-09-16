@@ -29,6 +29,8 @@ export interface MockupRequest {
   print: PrintSpec
   /** Output width in pixels. */
   width: number
+  /** Garment fit, for the 3D fallback's silhouette. */
+  fit?: string
 }
 
 const BASE = import.meta.env.BASE_URL
@@ -109,10 +111,20 @@ function release() {
 
 const results = new Map<string, Promise<string | null>>()
 
+/** No blank-garment photo: render the three.js T-shirt instead (null without WebGL). */
+async function bake3d(req: MockupRequest): Promise<string | null> {
+  try {
+    const { bakeTee } = await import('../three/teeBaker')
+    return await bakeTee({ fit: req.fit ?? 'regular', teeHex: req.teeHex, print: req.print }, req.width)
+  } catch {
+    return null
+  }
+}
+
 /** Resolves to an object URL for the finished mockup, or null when this garment type has no map. */
 export function renderMockup(req: MockupRequest): Promise<string | null> {
   const p = req.print
-  const key = [req.type, req.width, req.teeHex, p.printHex, p.font, p.printLines.join('/'), p.glyph, p.backdrop, p.backdropHex].join('|')
+  const key = [req.type, req.fit ?? '', req.width, req.teeHex, p.printHex, p.font, p.printLines.join('/'), p.glyph, p.backdrop, p.backdropHex].join('|')
   let result = results.get(key)
   if (!result) {
     result = compose(req).catch(() => null)
@@ -123,7 +135,7 @@ export function renderMockup(req: MockupRequest): Promise<string | null> {
 
 async function compose(req: MockupRequest): Promise<string | null> {
   const spec = (await loadMockupManifest())[req.type]
-  if (!spec) return null
+  if (!spec) return bake3d(req)
 
   await acquire()
   try {

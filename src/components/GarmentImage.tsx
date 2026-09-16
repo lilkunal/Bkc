@@ -41,7 +41,8 @@ export function GarmentImage(props: Props) {
   const backdrop = props.backdrop ?? product?.backdrop ?? 'none'
   const backdropHex = props.backdropHex ?? product?.backdropHex ?? ''
   const alt = props.alt ?? (product ? `${product.name} ${type === 'shirt' ? 'shirt' : 't-shirt'}` : 'Garment')
-  const key = [type, detail, teeHex, printHex, font, printLines.join('/'), glyph, backdrop, backdropHex].join('|')
+  const fit = props.fit ?? product?.fit ?? 'regular'
+  const key = [type, fit, detail, teeHex, printHex, font, printLines.join('/'), glyph, backdrop, backdropHex].join('|')
 
   const ref = useRef<HTMLDivElement>(null)
   const lastUrl = useRef<string | null>(null)
@@ -68,7 +69,7 @@ export function GarmentImage(props: Props) {
   useEffect(() => {
     if (image || !visible) return
     let live = true
-    renderMockup({ type, teeHex, width: MOCKUP_WIDTH[detail], print: { printLines, glyph, font, printHex, backdrop, backdropHex } }).then((url) => {
+    renderMockup({ type, fit, teeHex, width: MOCKUP_WIDTH[detail], print: { printLines, glyph, font, printHex, backdrop, backdropHex } }).then((url) => {
       if (!live) return
       if (url) lastUrl.current = url
       setResult({ key, url })
