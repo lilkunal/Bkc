@@ -126,7 +126,7 @@ function Hero({ section }: { section: SectionOf<'hero'> }) {
         </InView>
       </div>
 
-      <div className="hero-glow grid content-center gap-5 border-t border-line px-[clamp(1rem,0.5rem+3vw,3rem)] py-8 md:border-l md:border-t-0 md:py-12">
+      <div className="hero-glow grid content-center gap-5 px-[clamp(1rem,0.5rem+3vw,3rem)] py-8 md:py-12">
         <TiltStage enabled={finePointer && !reduced}>
           <div className="tilt-card relative mx-auto w-full max-w-[480px]">
             <GarmentImage
@@ -386,9 +386,9 @@ function Audiences({ section }: { section: SectionOf<'audiences'> }) {
   return (
     <section className="shell pb-16 md:pb-24" aria-labelledby="everyone-title">
       <SectionHead eyebrow={section.eyebrow} title={section.title} id="everyone-title" />
-      <div className="grid grid-cols-2 border-l border-t border-line lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
         {section.items.map((a) => (
-          <Link key={a.title} to={a.to} className="group grid content-start gap-1.5 border-b border-r border-line p-5 transition-colors duration-500 hover:bg-surface">
+          <Link key={a.title} to={a.to} className="group grid content-start gap-1.5 border border-line p-5 transition-colors duration-500 hover:bg-surface">
             <span className="font-display text-2xl font-semibold uppercase tracking-[0.06em] transition-colors group-hover:text-gold">{a.title}</span>
             <span className="text-sm text-muted">{a.note}</span>
           </Link>
@@ -425,9 +425,9 @@ function Journal({ section }: { section: SectionOf<'journal'> }) {
           </Link>
         }
       />
-      <div className="grid border-l border-t border-line md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-3">
         {posts.map((p, i) => (
-          <InView key={p.slug} transition={{ duration: 0.6, delay: i * 0.08, ease: EASE }} className="border-b border-r border-line">
+          <InView key={p.slug} transition={{ duration: 0.6, delay: i * 0.08, ease: EASE }} className="overflow-hidden border border-line">
             <Link to={`/blog/${p.slug}`} className="group grid h-full content-start gap-3 p-6 transition-colors duration-500 hover:bg-surface md:p-8">
               <p className="micro">
                 {p.cat} · {p.read} min

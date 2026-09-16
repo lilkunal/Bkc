@@ -173,9 +173,9 @@ const TRUST = [
 
 export function TrustBar() {
   return (
-    <ul className="grid grid-cols-1 border-l border-t border-line sm:grid-cols-2 lg:grid-cols-4" aria-label="Why BKC">
+    <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="Why BKC">
       {TRUST.map(({ Icon, title, note }) => (
-        <li key={title} className="flex items-center gap-4 border-b border-r border-line p-5">
+        <li key={title} className="flex items-center gap-4 border border-line p-5">
           <span className="text-gold">
             <Icon />
           </span>
