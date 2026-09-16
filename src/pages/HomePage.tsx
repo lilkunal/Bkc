@@ -94,7 +94,7 @@ function Hero({ section }: { section: SectionOf<'hero'> }) {
   }, [rotating])
 
   return (
-    <section className="relative isolate grid overflow-hidden border-b border-line md:grid-cols-2" aria-labelledby="hero-title">
+    <section className="relative isolate grid overflow-hidden md:grid-cols-2" aria-labelledby="hero-title">
       {section.backdrop3d &&
         (theme.backdrop === 'silk' ? <HeroBackdrop className="hero-canvas" /> : <ShapeBackdrop kind={theme.backdrop} seed={23} className="hero-canvas" />)}
       <div aria-hidden="true" className="hero-scrim" />

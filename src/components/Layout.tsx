@@ -286,7 +286,7 @@ export function Header() {
         Skip to content
       </a>
 
-      <div className="border-b border-line bg-surface px-4 py-2.5 text-center text-[0.6875rem] font-medium uppercase tracking-[0.22em] text-gold">
+      <div className="bg-surface px-4 py-2.5 text-center text-[0.6875rem] font-medium uppercase tracking-[0.22em] text-gold">
         {STORE.announcement.map((item, i) => (
           <span key={item} className={i > 1 ? 'hidden sm:inline' : undefined}>
             {i > 0 && (
@@ -300,7 +300,7 @@ export function Header() {
       </div>
 
       <header
-        className={`sticky top-0 z-50 border-b border-line bg-night/90 backdrop-blur-md transition-transform duration-500 ease-lux ${
+        className={`sticky top-0 z-50 bg-night/90 backdrop-blur-md transition-transform duration-500 ease-lux ${
           hidden && !menu ? '-translate-y-full' : ''
         }`}
         style={{ paddingTop: 'env(safe-area-inset-top)' }}
